@@ -2,139 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Coco Banana · QR Menu</title>
+  <title>Coco Banana · Premium Nightclub Experience</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- PWA manifest (optional, safe to keep even without SW) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+
   <style>
     :root {
-      --bg: #0a0015;
-      --bg-alt: #110015;
-      --bg-soft: #1a1025;
-      --neon-pink: #ec4899;
-      --neon-blue: #38bdf8;
-      --neon-purple: #a855f7;
-      --lux-gold: #facc15;
-      --text-main: #f9fafb;
-      --text-muted: #cbd5e1;
-      --danger: #fb7185;
-      --success: #22c55e;
-      --border-soft: rgba(148,163,184,0.35);
+      --bg: #000000;
+      --bg-alt: #0a0015;
+      --bg-soft: #1a0025;
+      --neon-pink: #ff2d95;
+      --neon-blue: #00f0ff;
+      --neon-purple: #b967ff;
+      --lux-gold: #ffd700;
+      --lux-gold-glow: #ffed4e;
+      --text-main: #ffffff;
+      --text-muted: #b0b0b0;
+      --danger: #ff3860;
+      --success: #00d4aa;
+      --border-soft: rgba(255,255,255,0.15);
+      --glass-bg: rgba(0, 0, 0, 0.7);
+      --glass-border: rgba(255,255,255,0.2);
+      --premium-glow: 0 0 30px rgba(255, 215, 0, 0.6);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       background: 
-        radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.25) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-        linear-gradient(135deg, #0f001a 0%, #1a0f2e 40%, #0a1429 100%);
+        radial-gradient(ellipse at 20% 20%, rgba(255, 45, 149, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 40% 60%, rgba(185, 103, 255, 0.15) 0%, transparent 50%),
+        linear-gradient(135deg, #000000 0%, #0a0015 30%, #1a0025 70%, #000000 100%);
+      background-attachment: fixed;
       color: var(--text-main);
       min-height: 100vh;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 45, 149, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(0, 240, 255, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     .app {
       max-width: 520px;
       margin: 0 auto;
-      padding: 22px 16px 36px;
+      padding: 20px 16px 30px;
+      position: relative;
     }
 
-    .logo-wrap {
-      text-align: center;
-      margin-bottom: 12px;
+    /* Premium Logo with Animation */
+    .logo-wrap { 
+      text-align: center; 
+      margin-bottom: 20px;
+      position: relative;
+      cursor: pointer;
     }
 
     .logo-text-main {
-      font-size: 40px;
-      font-weight: 800;
-      letter-spacing: 0.32em;
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: 0.3em;
       text-transform: uppercase;
-      color: #fff;
-      text-shadow: 0 0 22px rgba(248,250,252,0.55);
+      color: transparent;
+      background: linear-gradient(45deg, var(--neon-pink), var(--neon-blue), var(--lux-gold));
+      background-clip: text;
+      -webkit-background-clip: text;
+      text-shadow: 0 0 30px rgba(255, 45, 149, 0.5);
+      margin-bottom: -8px;
+      position: relative;
+      animation: logoGlow 3s ease-in-out infinite alternate;
     }
 
     .logo-text-sub {
-      font-family: "Pacifico", cursive;
-      font-size: 26px;
-      margin-top: -4px;
-      color: var(--neon-pink);
-      letter-spacing: 0.18em;
+      font-family: "Playfair Display", serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--lux-gold);
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      text-shadow:
-        0 0 14px rgba(236,72,153,0.9),
-        0 0 26px rgba(248,113,113,0.6);
+      text-shadow: 
+        0 0 20px var(--lux-gold-glow),
+        0 0 40px rgba(255, 215, 0, 0.4);
+      position: relative;
     }
 
-    .tagline {
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      line-height: 1.4;
+    .logo-text-sub::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--lux-gold), transparent);
     }
 
-    .glow-soft { box-shadow: 0 0 12px rgba(168,85,247,0.45); }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      background: linear-gradient(90deg, rgba(236,72,153,0.16), rgba(56,189,248,0.16));
-      border: 1px solid var(--border-soft);
-      color: var(--neon-blue);
+    @keyframes logoGlow {
+      0% { text-shadow: 0 0 20px rgba(255, 45, 149, 0.5), 0 0 40px rgba(0, 240, 255, 0.3); }
+      100% { text-shadow: 0 0 30px rgba(255, 45, 149, 0.8), 0 0 60px rgba(0, 240, 255, 0.5); }
     }
 
-    /* ===== Flash deal bar ===== */
+    .tagline { 
+      text-align: center; 
+      font-size: 13px; 
+      color: var(--text-muted); 
+      margin-bottom: 20px; 
+      line-height: 1.5;
+      letter-spacing: 0.05em;
+    }
+
+    /* Premium Flash Deal - Nightclub Style */
     .flash-bar {
-      border-radius: 18px;
-      padding: 12px 14px;
-      margin-bottom: 18px;
-      background:
-        radial-gradient(circle at top left, rgba(236,72,153,0.33), transparent 60%),
-        radial-gradient(circle at bottom right, rgba(56,189,248,0.18), transparent 60%),
-        rgba(15,10,25,0.98);
-      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, rgba(255, 45, 149, 0.15), rgba(0, 0, 0, 0.9));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 45, 149, 0.3);
       position: relative;
       overflow: hidden;
-      transition: opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(255, 45, 149, 0.2);
     }
 
-    .flash-bar.inactive {
-      opacity: 0.7;
+    .flash-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.6s ease;
     }
 
-    .flash-bar.active {
-      animation: subtleGlow 2s infinite;
-      border-color: rgba(248, 113, 113, 0.6);
+    .flash-bar:hover::before {
+      left: 100%;
+    }
+
+    .flash-bar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(255, 45, 149, 0.4);
+      border-color: rgba(255, 45, 149, 0.6);
+    }
+
+    .flash-bar.inactive { 
+      opacity: 0.8;
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0, 0, 0, 0.9));
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .flash-bar.active { 
+      animation: premiumPulse 2s ease-in-out infinite;
+      border-color: rgba(255, 45, 149, 0.8);
+      box-shadow: 0 0 30px rgba(255, 45, 149, 0.4), 0 8px 32px rgba(255, 45, 149, 0.3);
     }
 
     .flash-bar.ending-soon {
-      animation: urgentPulse 1s infinite;
-      border-color: rgba(248, 113, 113, 0.8);
+      animation: urgentPulse 1s ease-in-out infinite;
+      border-color: rgba(255, 56, 96, 0.8);
+      box-shadow: 0 0 40px rgba(255, 56, 96, 0.6), 0 8px 32px rgba(255, 56, 96, 0.4);
     }
 
-    @keyframes subtleGlow {
-      0%, 100% {
-        box-shadow: 0 0 12px rgba(248, 113, 113, 0.4);
+    @keyframes premiumPulse {
+      0%, 100% { 
+        box-shadow: 0 0 20px rgba(255, 45, 149, 0.4), 0 8px 32px rgba(255, 45, 149, 0.3);
       }
-      50% {
-        box-shadow: 0 0 20px rgba(248, 113, 113, 0.8);
+      50% { 
+        box-shadow: 0 0 40px rgba(255, 45, 149, 0.8), 0 12px 48px rgba(255, 45, 149, 0.6);
       }
     }
 
     @keyframes urgentPulse {
-      0%, 100% {
-        box-shadow: 0 0 15px rgba(248, 113, 113, 0.6);
+      0%, 100% { 
+        box-shadow: 0 0 25px rgba(255, 56, 96, 0.6), 0 8px 32px rgba(255, 56, 96, 0.4);
       }
-      50% {
-        box-shadow: 0 0 25px rgba(248, 113, 113, 1);
+      50% { 
+        box-shadow: 0 0 50px rgba(255, 56, 96, 1), 0 12px 48px rgba(255, 56, 96, 0.8);
       }
     }
 
@@ -142,174 +209,153 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 6px;
-      gap: 8px;
+      margin-bottom: 12px;
+      gap: 10px;
     }
 
     .flash-title {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 14px;
+      gap: 10px;
+      font-size: 16px;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: var(--neon-pink);
     }
 
     .flash-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #f97316;
-      box-shadow: 0 0 16px rgba(248,113,113,0.9);
-      animation: pulse 1.25s infinite;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--neon-pink);
+      box-shadow: 0 0 20px var(--neon-pink);
+      animation: dotPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .flash-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      background: linear-gradient(135deg, rgba(255, 45, 149, 0.2), rgba(0, 240, 255, 0.2));
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: var(--neon-blue);
+      backdrop-filter: blur(10px);
     }
 
     .flash-body {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      gap: 12px;
-      font-size: 12px;
+      gap: 15px;
+      font-size: 14px;
     }
 
-    .flash-item-name {
-      font-weight: 600;
+    .flash-item-name { 
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-main);
     }
 
-    .flash-item-meta {
-      font-size: 11px;
-      color: var(--text-muted);
+    .flash-item-meta { 
+      font-size: 13px; 
+      color: var(--neon-blue);
+      margin-top: 4px;
     }
 
-    .flash-timer {
+    .flash-timer { 
       text-align: right;
+      min-width: 80px;
     }
 
     .flash-timer-label {
-      font-size: 10px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.15em;
       color: var(--text-muted);
+      margin-bottom: 4px;
     }
 
     .flash-timer-value {
-      font-size: 16px;
-      font-weight: 700;
-      color: #f97316;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--lux-gold);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      font-feature-settings: "tnum";
     }
 
     .flash-meter {
-      margin-top: 8px;
+      margin-top: 15px;
       width: 100%;
-      height: 3px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
+      height: 4px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
       overflow: hidden;
+      position: relative;
     }
 
     .flash-meter-fill {
       width: 100%;
       height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #f97316, #eab308);
-      transform-origin: right center;
-      transform: scaleX(0);
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--neon-pink), var(--lux-gold));
+      transform-origin: left center;
+      transform: scaleX(1);
       transition: transform 0.5s linear;
+      position: relative;
     }
 
-    .flash-admin-row {
-      margin-top: 6px;
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      align-items: center;
-      font-size: 9px;
-      color: var(--text-muted);
+    .flash-meter-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s infinite;
     }
 
-    /* ===== Tabs ===== */
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Premium Tabs */
     .tabs {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin: 14px 0;
+      gap: 10px;
+      margin: 20px 0;
+      justify-content: center;
     }
 
     .tab-btn {
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 13px;
-      border: 1px solid var(--border-soft);
-      background: rgba(10,10,25,0.9);
+      border-radius: 25px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.6);
       color: var(--text-muted);
       cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .tab-btn:hover {
-      background: rgba(30,41,59,0.9);
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
-      color: #fff;
-      border-color: transparent;
-    }
-
-    /* ===== Sections & cards ===== */
-    .section {
-      margin-bottom: 18px;
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 8px;
-    }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #e5e7eb;
-    }
-
-    .section-tag {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .card-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .card {
-      padding: 10px 12px;
-      border-radius: 14px;
-      background:
-        radial-gradient(circle at top left, rgba(108,23,148,0.45), transparent 60%),
-        radial-gradient(circle at bottom right, rgba(24,0,33,0.95), rgba(10,0,20,1));
-      border: 1px solid rgba(148,163,184,0.35);
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      backdrop-filter: blur(10px);
       position: relative;
       overflow: hidden;
     }
 
-    .card:hover {
-      background: rgba(56,48,81,0.9);
-      box-shadow:
-        0 0 12px rgba(248,113,113,0.55),
-        0 0 28px rgba(168,85,247,0.55);
-      transform: translateY(-2px);
-    }
-
-    .card::before {
+    .tab-btn::before {
       content: '';
       position: absolute;
       top: 0;
@@ -320,127 +366,257 @@
       transition: left 0.5s;
     }
 
+    .tab-btn:hover::before {
+      left: 100%;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      color: #000;
+      border-color: transparent;
+      box-shadow: 0 5px 20px rgba(255, 45, 149, 0.4);
+      font-weight: 700;
+    }
+
+    /* Premium Cards */
+    .section { 
+      margin-bottom: 25px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 0 5px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--text-main);
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-pink), transparent);
+    }
+
+    .section-tag { 
+      font-size: 12px; 
+      color: var(--neon-blue);
+      letter-spacing: 0.1em;
+    }
+
+    .card-list { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 15px;
+    }
+
+    .card {
+      padding: 20px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.8));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      transition: left 0.6s ease;
+    }
+
     .card:hover::before {
       left: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
     }
 
     .card-main {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      gap: 10px;
+      align-items: center;
+      gap: 15px;
     }
 
-    .card-name {
-      font-size: 16px;
-      font-weight: 500;
+    .card-name { 
+      font-size: 17px; 
+      font-weight: 600;
+      color: var(--text-main);
     }
 
     .card-price {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--neon-blue);
-      white-space: nowrap;
-    }
-
-    .card-price .strike {
-      text-decoration: line-through;
-      opacity: 0.6;
-      margin-right: 4px;
-    }
-
-    .card-price .discount {
-      color: var(--neon-pink);
+      font-size: 18px;
       font-weight: 700;
+      color: var(--lux-gold);
+      white-space: nowrap;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
     }
 
-    /* Popular item badges */
+    .card-price .strike { 
+      text-decoration: line-through; 
+      opacity: 0.5; 
+      margin-right: 8px;
+      color: var(--text-muted);
+    }
+
+    .card-price .discount { 
+      color: var(--neon-pink); 
+      font-weight: 800;
+      text-shadow: 0 0 10px rgba(255, 45, 149, 0.5);
+    }
+
     .popular-badge {
       position: absolute;
-      top: -5px;
-      right: -5px;
-      background: var(--neon-pink);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 10px;
+      top: -8px;
+      right: -8px;
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      color: #000;
+      padding: 6px 12px;
+      border-radius: 12px;
       font-size: 10px;
-      font-weight: bold;
+      font-weight: 900;
       transform: rotate(5deg);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(255, 45, 149, 0.4);
+      letter-spacing: 0.1em;
+      z-index: 2;
     }
 
-    /* ===== Spin sections ===== */
-    .spin-wrap {
-      margin-top: 6px;
+    /* Premium Spin Sections */
+    .spin-wrap { 
+      margin-top: 10px;
+      animation: fadeInUp 0.8s ease-out;
     }
 
     .spin-panel {
-      padding: 12px 14px 16px;
-      border-radius: 14px;
-      background:
-        radial-gradient(circle at top left, rgba(56,189,248,0.25), transparent 60%),
-        radial-gradient(circle at bottom right, rgba(236,72,153,0.24), transparent 60%),
-        rgba(8,8,24,0.98);
-      border: 1px solid var(--border-soft);
+      padding: 25px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(255, 45, 149, 0.1));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       position: relative;
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .spin-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-pink), var(--neon-blue), transparent);
     }
 
     .gold-spin-panel {
-      background:
-        radial-gradient(circle at top left, rgba(250,204,21,0.25), transparent 65%),
-        radial-gradient(circle at bottom right, rgba(56,189,248,0.18), transparent 60%),
-        linear-gradient(135deg, #0b0820 0%, #1b1030 40%, #050814 100%);
-      border: 1.5px solid rgba(250,204,21,0.65);
-      box-shadow:
-        0 0 26px rgba(250,204,21,0.35),
-        0 0 40px rgba(24,24,60,0.8);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(255, 215, 0, 0.15));
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+    }
+
+    .gold-spin-panel::before {
+      background: linear-gradient(90deg, transparent, var(--lux-gold), var(--neon-pink), transparent);
     }
 
     .spin-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      gap: 15px;
     }
 
     .spin-title {
-      font-size: 16px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
     }
 
     .spin-title.gold {
-      color: var(--lux-gold);
-      text-shadow: 0 0 12px rgba(250,204,21,0.65);
+      background: linear-gradient(135deg, var(--lux-gold), #ff6b00);
+      background-clip: text;
+      -webkit-background-clip: text;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
     }
 
     .spin-sub {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
-      margin-top: 2px;
-      line-height: 1.4;
+      margin-top: 8px;
+      line-height: 1.5;
+      max-width: 300px;
     }
 
     .wheel-container {
       position: relative;
-      width: 200px;
-      height: 200px;
-      margin: 8px auto 6px;
+      width: 220px;
+      height: 220px;
+      margin: 20px auto;
     }
 
-    .spin-wheel,
-    .golden-wheel {
+    .spin-wheel, .golden-wheel {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 16px rgba(0,0,0,0.5);
-      border: 2px solid rgba(15,23,42,0.9);
       position: relative;
       overflow: hidden;
       transition: transform 4s cubic-bezier(0.2, 0.8, 0.3, 1);
+      box-shadow: 
+        0 0 0 4px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(0, 0, 0, 0.8);
     }
 
     .spin-wheel {
@@ -458,20 +634,16 @@
     .golden-wheel {
       background: conic-gradient(
         from 0deg,
-        #facc15 0deg 40deg,
-        #f97316 40deg 80deg,
-        #7c2d12 80deg 120deg,
-        #facc15 120deg 160deg,
-        #f97316 160deg 200deg,
-        #7c2d12 200deg 240deg,
-        #facc15 240deg 280deg,
-        #f97316 280deg 320deg,
-        #7c2d12 320deg 360deg
+        #ffd700 0deg 40deg,
+        #ff6b00 40deg 80deg,
+        #ff4444 80deg 120deg,
+        #ffd700 120deg 160deg,
+        #ff6b00 160deg 200deg,
+        #ff4444 200deg 240deg,
+        #ffd700 240deg 280deg,
+        #ff6b00 280deg 320deg,
+        #ff4444 320deg 360deg
       );
-      border-color: rgba(250,204,21,0.9);
-      box-shadow:
-        0 0 30px rgba(250,204,21,0.6),
-        inset 0 0 20px rgba(0,0,0,0.45);
     }
 
     .wheel-center {
@@ -479,622 +651,735 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 40px;
-      height: 40px;
-      background: rgba(15,23,42,0.9);
+      width: 50px;
+      height: 50px;
+      background: rgba(0, 0, 0, 0.9);
       border-radius: 50%;
-      border: 3px solid rgba(255,255,255,0.8);
+      border: 3px solid rgba(255, 255, 255, 0.8);
       z-index: 10;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
     }
 
     .wheel-pointer {
       position: absolute;
-      top: -15px;
+      top: -20px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-top: 25px solid var(--neon-pink);
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 35px solid var(--neon-pink);
       z-index: 20;
-      filter: drop-shadow(0 0 5px rgba(0,0,0,0.7));
+      filter: drop-shadow(0 0 10px rgba(255, 45, 149, 0.8));
     }
 
-    .spin-wheel.spinning,
-    .golden-wheel.spinning {
-      animation: spin 4s cubic-bezier(0.2, 0.8, 0.3, 1);
+    .gold-spin-panel .wheel-pointer {
+      border-top-color: var(--lux-gold);
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+    }
+
+    .spin-wheel.spinning, .golden-wheel.spinning {
+      animation: premiumSpin 4s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+
+    @keyframes premiumSpin {
+      0% { 
+        transform: rotate(0deg);
+        filter: hue-rotate(0deg);
+      }
+      100% { 
+        transform: rotate(1440deg);
+        filter: hue-rotate(360deg);
+      }
     }
 
     .spin-btn {
-      margin-top: 10px;
+      margin-top: 20px;
       width: 100%;
-      padding: 12px 14px;
-      border-radius: 999px;
+      padding: 18px 24px;
+      border-radius: 50px;
       border: none;
       cursor: pointer;
-      font-size: 16px;
-      font-weight: 700;
-      background: radial-gradient(circle at top, var(--neon-purple), var(--neon-pink));
-      color: #fff;
-      text-shadow: 0 0 10px rgba(15,23,42,0.9);
-      box-shadow: 0 0 26px rgba(236,72,153,0.7);
-      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      color: #000;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+      box-shadow: 
+        0 5px 20px rgba(255, 45, 149, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .spin-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .spin-btn:hover::before {
+      left: 100%;
+    }
+
+    .spin-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 
+        0 8px 30px rgba(255, 45, 149, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
     }
 
     .spin-btn.gold {
-      background: radial-gradient(circle at top, #facc15, #f97316);
-      box-shadow: 0 0 30px rgba(250,204,21,0.8);
-      color: #111827;
+      background: linear-gradient(135deg, var(--lux-gold), #ff6b00);
+      box-shadow: 
+        0 5px 20px rgba(255, 215, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .spin-btn.gold:hover {
+      box-shadow: 
+        0 8px 30px rgba(255, 215, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
     }
 
     .spin-btn:active {
-      transform: scale(0.96);
-      box-shadow: 0 0 18px rgba(236,72,153,0.5);
-    }
-
-    .spin-btn.gold:active {
-      box-shadow: 0 0 22px rgba(250,204,21,0.7);
+      transform: translateY(-1px);
     }
 
     .spin-btn:disabled {
-      opacity: 0.7;
+      opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
 
     .spin-btn.spinning {
-      animation: spinPulse 0.9s infinite;
+      animation: btnPulse 0.8s ease-in-out infinite;
+    }
+
+    @keyframes btnPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
     }
 
     .spin-result {
-      margin-top: 10px;
-      min-height: 34px;
-      font-size: 14px;
+      margin-top: 20px;
+      min-height: 50px;
+      font-size: 16px;
       text-align: center;
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
     }
 
     .spin-result-main {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 18px;
+      display: block;
+      margin-bottom: 5px;
     }
 
     .spin-result-main.big {
-      font-size: 18px;
+      font-size: 24px;
       color: var(--lux-gold);
-      text-shadow:
-        0 0 10px rgba(250,204,21,0.7),
-        0 0 22px rgba(236,72,153,0.7);
+      text-shadow: 
+        0 0 20px var(--lux-gold-glow),
+        0 0 40px rgba(255, 215, 0, 0.5);
+      animation: resultGlow 2s ease-in-out infinite;
     }
 
-    .spin-result-main.mid {
+    @keyframes resultGlow {
+      0%, 100% { text-shadow: 0 0 20px var(--lux-gold-glow), 0 0 40px rgba(255, 215, 0, 0.5); }
+      50% { text-shadow: 0 0 30px var(--lux-gold-glow), 0 0 60px rgba(255, 215, 0, 0.8); }
+    }
+
+    .spin-result-main.mid { 
       color: var(--neon-blue);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
-    .spin-result-main.low {
+    .spin-result-main.low { 
       color: var(--text-muted);
     }
 
     .spin-result-note {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
+      line-height: 1.4;
     }
 
-    /* Silver prizes grid (now with highlighted big prizes) */
-    .silver-prizes {
-      margin-top: 14px;
+    /* Prize Grids */
+    .silver-prizes, .gold-prizes-title {
+      margin-top: 25px;
     }
 
-    .silver-prizes-title {
-      font-size: 11px;
+    .silver-prizes-title, .gold-prizes-title {
+      font-size: 14px;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      margin-bottom: 8px;
+      letter-spacing: 0.2em;
+      margin-bottom: 15px;
       color: var(--neon-blue);
+      text-align: center;
+      font-weight: 700;
     }
 
-    .silver-prizes-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
+    .gold-prizes-title {
+      color: var(--lux-gold);
     }
 
-    /* Golden prizes premium grid */
-    .premium-prizes-grid {
+    .silver-prizes-grid, .premium-prizes-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 12px;
     }
 
     .prize-item {
-      padding: 10px 13px;
-      border-radius: 12px;
-      background: rgba(15,23,42,0.75);
-      border: 1px solid rgba(148,163,184,0.4);
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       transition: all 0.3s ease;
       position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .prize-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(5px);
     }
 
     .prize-item.big-prize {
-      background: linear-gradient(135deg,
-        rgba(250,204,21,0.22),
-        rgba(248,113,113,0.17));
-      border: 2px solid rgba(250,204,21,0.9);
-      box-shadow:
-        0 0 20px rgba(250,204,21,0.6),
-        inset 0 0 15px rgba(250,204,21,0.18);
-      animation: luxuryPulse 4s infinite;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 45, 149, 0.1));
+      border: 2px solid rgba(255, 215, 0, 0.6);
+      box-shadow: 
+        0 5px 20px rgba(255, 215, 0, 0.3),
+        inset 0 0 20px rgba(255, 215, 0, 0.1);
+      animation: luxuryPulse 3s ease-in-out infinite;
     }
 
     .prize-item.big-prize::before {
       content: '✨';
       position: absolute;
-      left: 9px;
+      left: 15px;
       top: 50%;
       transform: translateY(-50%);
+      font-size: 18px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+      50% { opacity: 0.7; transform: translateY(-50%) scale(1.1); }
     }
 
     .prize-text {
-      font-weight: 600;
-      margin-left: 22px;
-      font-size: 13px;
+      font-weight: 700;
+      margin-left: 35px;
+      font-size: 14px;
     }
 
     .prize-item.big-prize .prize-text {
       color: var(--lux-gold);
-      text-shadow: 0 0 10px rgba(250,204,21,0.7);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     }
 
     .prize-value {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-muted);
-      margin-top: 2px;
-      margin-left: 22px;
+      margin-top: 4px;
+      margin-left: 35px;
     }
 
     .prize-item.big-prize .prize-value {
-      color: #f97316;
-      font-weight: 500;
-    }
-
-    .gold-prizes-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      margin: 14px 0 8px;
-      color: var(--lux-gold);
+      color: #ffa500;
+      font-weight: 600;
     }
 
     @keyframes luxuryPulse {
-      0%, 100% {
-        box-shadow: 0 0 20px rgba(250,204,21,0.5);
+      0%, 100% { 
+        box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1);
         transform: scale(1);
       }
-      50% {
-        box-shadow: 0 0 30px rgba(250,204,21,0.9);
+      50% { 
+        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6), inset 0 0 30px rgba(255, 215, 0, 0.2);
         transform: scale(1.02);
       }
     }
 
-    /* Spin Code Input (for each spin) */
+    /* Spin Code Input */
     .spin-code-panel {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      background: rgba(5,5,20,0.95);
-      border: 1px dashed var(--border-soft);
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(15px);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
       text-align: center;
     }
 
     .spin-code-input {
       display: flex;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 12px;
+      margin-top: 15px;
       justify-content: center;
+      align-items: center;
     }
 
     .spin-code-input input {
-      width: 70px;
-      padding: 7px;
-      border-radius: 8px;
-      border: 1px solid var(--border-soft);
-      background: rgba(15,23,42,0.95);
+      width: 100px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.8);
       color: var(--text-main);
-      font-size: 15px;
+      font-size: 18px;
       text-align: center;
-      letter-spacing: 2px;
+      letter-spacing: 4px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .spin-code-input input:focus {
+      outline: none;
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
     }
 
     .spin-code-btn {
-      padding: 7px 14px;
-      border-radius: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
       border: none;
-      background: var(--neon-purple);
-      color: #fff;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      color: #000;
       cursor: pointer;
-      font-size: 13px;
-      transition: background 0.2s ease;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      letter-spacing: 0.1em;
     }
 
     .spin-code-btn:hover {
-      background: var(--neon-pink);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
     }
 
     .spin-code-msg {
-      margin-top: 6px;
-      font-size: 12px;
+      margin-top: 12px;
+      font-size: 13px;
       color: var(--text-muted);
+      min-height: 20px;
     }
 
     .spin-code-error {
       color: var(--danger) !important;
+      text-shadow: 0 0 10px rgba(255, 56, 96, 0.3);
     }
 
     .spin-code-success {
       color: var(--success) !important;
+      text-shadow: 0 0 10px rgba(0, 212, 170, 0.3);
     }
 
-    /* Loading spinner */
     .loading-spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid transparent;
-      border-top: 2px solid var(--neon-blue);
+      width: 24px;
+      height: 24px;
+      border: 3px solid transparent;
+      border-top: 3px solid var(--neon-blue);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
 
-    /* ===== Admin ===== */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Hidden Admin System */
     .admin-bar {
-      margin-top: 10px;
-      text-align: right;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .admin-link {
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      transition: color 0.2s ease;
-    }
-
-    .admin-link:hover {
-      color: var(--neon-blue);
+      margin-top: 15px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 0.1em;
     }
 
     .admin-panel {
-      margin-top: 8px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: rgba(5,5,20,0.95);
-      border: 1px dashed var(--border-soft);
-      font-size: 12px;
+      margin-top: 15px;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 13px;
       display: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .admin-panel > div:first-child {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--neon-blue);
+      text-align: center;
+    }
+
+    .admin-badge {
+      font-size: 12px;
+      color: var(--success);
+      margin-top: 5px;
+      text-align: center;
+      font-weight: 600;
     }
 
     .admin-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 6px;
-      margin-top: 8px;
+      gap: 10px;
+      margin-top: 12px;
       flex-wrap: wrap;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .admin-row:last-child {
+      border-bottom: none;
     }
 
     .switch {
       position: relative;
-      width: 34px;
-      height: 18px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid var(--border-soft);
+      width: 50px;
+      height: 26px;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
       flex-shrink: 0;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
     }
 
     .switch:hover {
-      background: rgba(30,41,59,0.9);
+      background: rgba(255, 255, 255, 0.15);
     }
 
     .switch-knob {
       position: absolute;
-      top: 1px;
-      left: 1px;
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      background: #f9fafb;
-      transition: transform 0.16s ease-out, background-color 0.16s ease-out;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--text-main);
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 
     .switch.on {
-      background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+      border-color: transparent;
     }
 
     .switch.on .switch-knob {
-      transform: translateX(14px);
-      background: #0f172a;
+      transform: translateX(24px);
+      background: #000;
     }
 
-    .admin-input {
-      width: 80px;
-      padding: 4px 6px;
-      border-radius: 6px;
-      border: 1px solid var(--border-soft);
-      background: rgba(15,23,42,0.95);
+    .admin-input, .admin-select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.6);
       color: var(--text-main);
-      font-size: 12px;
+      font-size: 13px;
+      min-width: 80px;
     }
 
     .admin-select {
-      width: 160px;
-      padding: 4px 6px;
-      border-radius: 6px;
-      border: 1px solid var(--border-soft);
-      background: rgba(15,23,42,0.95);
-      color: var(--text-main);
-      font-size: 12px;
-    }
-
-    .admin-badge {
-      font-size: 11px;
-      color: var(--success);
-      margin-top: 4px;
+      min-width: 160px;
     }
 
     .admin-login {
-      margin-top: 6px;
+      margin-top: 15px;
       display: flex;
-      gap: 6px;
+      gap: 10px;
       align-items: center;
     }
 
     .admin-login input {
       flex: 1;
-      padding: 4px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border-soft);
-      background: rgba(15,23,42,0.95);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.6);
       color: var(--text-main);
-      font-size: 12px;
+      font-size: 14px;
+      text-align: center;
+      letter-spacing: 2px;
     }
 
     .admin-login button {
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 10px 20px;
+      border-radius: 8px;
       border: none;
-      background: var(--neon-purple);
-      color: #fff;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      color: #000;
       cursor: pointer;
-      font-size: 12px;
-      transition: background 0.2s ease;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.3s ease;
     }
 
     .admin-login button:hover {
-      background: var(--neon-pink);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
     }
 
     #adminFlashSummary {
-      margin-top: 6px;
-      font-size: 11px;
+      margin-top: 15px;
+      font-size: 12px;
       color: var(--text-muted);
+      text-align: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
     }
+
+    .preset-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preset-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      transform: translateY(-2px);
+    }
+
+    .preset-btn.weekday:hover { border-color: var(--neon-blue); }
+    .preset-btn.weekend:hover { border-color: var(--neon-pink); }
+    .preset-btn.party:hover { border-color: var(--lux-gold); }
 
     .footer {
-      margin-top: 40px;
-      font-size: 12px;
+      margin-top: 50px;
+      font-size: 11px;
       text-align: center;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.6;
+      letter-spacing: 0.05em;
+      padding: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Quick nav */
+    /* Quick Navigation */
     .quick-nav {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 25px;
+      right: 25px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       z-index: 1000;
     }
 
     .quick-nav button {
-      width: 50px;
-      height: 50px;
+      width: 55px;
+      height: 55px;
       border-radius: 50%;
-      background: var(--neon-purple);
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
       border: none;
-      color: white;
-      font-size: 20px;
+      color: #000;
+      font-size: 22px;
       cursor: pointer;
-      transition: transform 0.2s;
-      box-shadow: 0 0 14px rgba(0,0,0,0.6);
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 5px 20px rgba(255, 45, 149, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quick-nav button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .quick-nav button:hover::before {
+      left: 100%;
     }
 
     .quick-nav button:hover {
-      transform: scale(1.1);
+      transform: scale(1.15) translateY(-3px);
+      box-shadow: 0 8px 30px rgba(255, 45, 149, 0.6);
     }
 
-    /* Accessibility */
-    .tab-btn:focus,
-    .spin-btn:focus,
-    .flash-toggle-btn:focus,
-    .admin-link:focus,
-    .switch:focus {
-      outline: 2px solid var(--neon-blue);
-      outline-offset: 2px;
+    .quick-nav button:nth-child(2) {
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      box-shadow: 0 5px 20px rgba(0, 240, 255, 0.4);
     }
 
-    .tab-btn:focus-visible,
-    .spin-btn:focus-visible,
-    .admin-link:focus-visible {
-      outline: 3px solid var(--neon-blue);
-      outline-offset: 2px;
+    .quick-nav button:nth-child(3) {
+      background: linear-gradient(135deg, var(--lux-gold), #ff6b00);
+      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
     }
 
-    button:not(:disabled) {
-      cursor: pointer;
+    .quick-nav button:nth-child(4) {
+      background: linear-gradient(135deg, var(--success), var(--neon-blue));
+      box-shadow: 0 5px 20px rgba(0, 212, 170, 0.4);
     }
 
-    /* Animations */
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.25); opacity: 0.65; }
-      100% { transform: scale(1); opacity: 1; }
+    #scrollTopBtn {
+      background: linear-gradient(135deg, #666, #999) !important;
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2) !important;
+      display: none;
     }
 
-    @keyframes spinPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.04); }
-      100% { transform: scale(1); }
+    /* Skeleton Loading */
+    #loadingSkeleton { display: none; margin-bottom: 20px; }
+    .skeleton-card {
+      height: 70px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(1440deg); }
-    }
-
-    @media (min-width: 700px) {
-      .app { margin-top: 14px; }
-    }
-
+    /* Responsive Design */
     @media (max-width: 480px) {
-      .logo-text-main {
-        font-size: 32px;
-        letter-spacing: 0.24em;
-      }
-      
-      .logo-text-sub {
-        font-size: 22px;
-      }
-      
-      .tabs {
-        gap: 6px;
-      }
-      
-      .tab-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-      }
-
-      .wheel-container {
-        width: 170px;
-        height: 170px;
-      }
-
-      .quick-nav {
-        bottom: 12px;
-        right: 12px;
-      }
-
-      .quick-nav button {
-        width: 44px;
-        height: 44px;
-        font-size: 18px;
-      }
+      .app { padding: 15px 12px 25px; }
+      .logo-text-main { font-size: 42px; letter-spacing: 0.25em; }
+      .logo-text-sub { font-size: 24px; }
+      .flash-bar { padding: 15px; }
+      .wheel-container { width: 200px; height: 200px; }
+      .quick-nav { bottom: 15px; right: 15px; }
+      .quick-nav button { width: 50px; height: 50px; font-size: 20px; }
+      .tabs { gap: 8px; }
+      .tab-btn { padding: 10px 16px; font-size: 13px; }
+      .spin-panel { padding: 20px; }
     }
 
     @media (max-width: 380px) {
-      .app {
-        padding: 16px 12px 24px;
-      }
-      
-      .logo-text-main {
-        font-size: 28px;
-      }
-      
-      .logo-text-sub {
-        font-size: 20px;
-      }
-      
-      .tabs {
-        justify-content: center;
-      }
+      .logo-text-main { font-size: 36px; }
+      .logo-text-sub { font-size: 20px; }
+      .flash-body { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .flash-timer { text-align: left; }
     }
 
-    /* High contrast mode support */
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* High contrast mode */
     @media (prefers-contrast: high) {
       :root {
         --text-main: #ffffff;
         --text-muted: #cccccc;
-        --border-soft: rgba(255,255,255,0.6);
+        --border-soft: rgba(255,255,255,0.8);
       }
-    }
-
-    /* Reduced motion support */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
+      .card { border: 2px solid var(--border-soft); }
+      .spin-btn { border: 2px solid white; }
     }
   </style>
 </head>
 <body>
 <div class="app">
+  <!-- Premium Logo (hidden admin trigger via tapping/holding) -->
   <div class="logo-wrap">
     <div class="logo-text-main">COCO</div>
     <div class="logo-text-sub">BANANA</div>
   </div>
+  
   <div class="tagline">
-    Menu · Ulaanbaatar · 21+ · Захиалга өгөх, төлбөр төлөхийг хүсвэл зөөгчид хэлнэ үү.
+    Premium Nightclub Experience · Ulaanbaatar · 21+ · Order & payment through our staff
   </div>
 
-  <!-- Flash Deal -->
+  <!-- Skeleton Loading -->
+  <div id="loadingSkeleton">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+
+  <!-- Premium Flash Deal -->
   <div id="flashBar" class="flash-bar inactive">
     <div class="flash-header">
       <div class="flash-title">
         <div class="flash-dot"></div>
-        <span>Flash Deal</span>
+        <span>EXCLUSIVE DEAL</span>
       </div>
-      <div class="pill">CoCo Banana Ulaanbaatar</div>
+      <div class="flash-pill">Limited Time</div>
     </div>
     <div class="flash-body">
       <div>
-        <div id="flashItemName" class="flash-item-name">Одоогоор хямдралгүй</div>
-        <div id="flashItemMeta" class="flash-item-meta">
-          Хямдрал идэвхжих үед энд мэдээлэл гарна.
-        </div>
+        <div id="flashItemName" class="flash-item-name">No active deals</div>
+        <div id="flashItemMeta" class="flash-item-meta">Check back for exclusive offers</div>
       </div>
       <div class="flash-timer">
-        <div class="flash-timer-label">Time left</div>
+        <div class="flash-timer-label">TIME LEFT</div>
         <div id="flashTimerValue" class="flash-timer-value">--:--</div>
       </div>
     </div>
     <div class="flash-meter">
       <div id="flashMeterFill" class="flash-meter-fill"></div>
     </div>
-    <div class="flash-admin-row">
-      <div>CoCo Banana Ulaanbaatar</div>
-    </div>
   </div>
 
-  <!-- Tabs -->
+  <!-- Premium Tabs -->
   <div class="tabs" id="tabs">
-    <button class="tab-btn active" data-tab="all">All</button>
-    <button class="tab-btn" data-tab="cocktails">Cocktails</button>
-    <button class="tab-btn" data-tab="beer">Beer</button>
-    <button class="tab-btn" data-tab="whiskey">Whiskey</button>
-    <button class="tab-btn" data-tab="vodka">Vodka</button>
-    <button class="tab-btn" data-tab="gin">Gin</button>
-    <button class="tab-btn" data-tab="tequila">Tequila</button>
-    <button class="tab-btn" data-tab="cognac">Cognac</button>
-    <button class="tab-btn" data-tab="wine">Wine</button>
-    <button class="tab-btn" data-tab="liquor">Liquor</button>
-    <button class="tab-btn" data-tab="sets">Sets</button>
-    <button class="tab-btn" data-tab="snacks">Snacks</button>
-    <button class="tab-btn" data-tab="softdrinks">Soft Drinks</button>
+    <button class="tab-btn active" data-tab="all">ALL</button>
+    <button class="tab-btn" data-tab="cocktails">COCKTAILS</button>
+    <button class="tab-btn" data-tab="beer">BEER</button>
+    <button class="tab-btn" data-tab="whiskey">WHISKEY</button>
+    <button class="tab-btn" data-tab="vodka">VODKA</button>
+    <button class="tab-btn" data-tab="gin">GIN</button>
+    <button class="tab-btn" data-tab="tequila">TEQUILA</button>
+    <button class="tab-btn" data-tab="cognac">COGNAC</button>
+    <button class="tab-btn" data-tab="wine">WINE</button>
+    <button class="tab-btn" data-tab="liquor">LIQUEUR</button>
+    <button class="tab-btn" data-tab="sets">SETS</button>
+    <button class="tab-btn" data-tab="snacks">SNACKS</button>
+    <button class="tab-btn" data-tab="softdrinks">MIXERS</button>
   </div>
 
-  <!-- Menu sections container -->
+  <!-- Menu Container -->
   <div id="menuContainer"></div>
 
   <!-- SILVER SPIN -->
@@ -1103,11 +1388,9 @@
       <div class="spin-header">
         <div>
           <div class="spin-title">SILVER SPIN</div>
-          <div class="spin-sub">
-            1 удаа тоглоход 10,000₮ · Өндөр Шагнал · Төлбөр төлсний дараа зөөгч код оруулж spin-ыг идэвхжүүлнэ.
-          </div>
+          <div class="spin-sub">Premium prizes · Staff activation required after payment · One spin per activation</div>
         </div>
-        <div class="pill">Ажилтны код шаардлагатай</div>
+        <div class="flash-pill">Staff Code</div>
       </div>
 
       <div class="wheel-container">
@@ -1116,31 +1399,22 @@
         <div class="wheel-pointer"></div>
       </div>
 
-      <!-- Spin Code Input (Silver) -->
       <div class="spin-code-panel" id="spinCodePanel">
-        <div style="font-size: 13px; color: var(--text-muted);">
-          Төлбөр төлсний дараа зөөгч Silver Spin код оруулна уу
-        </div>
+        <div style="font-size: 14px; color: var(--neon-blue); font-weight: 600;">STAFF ACTIVATION REQUIRED</div>
         <div class="spin-code-input">
           <input type="password" id="spinCodeInput" maxlength="6" placeholder="000000" />
-          <button class="spin-code-btn" id="spinCodeBtn">Хүрд идэвхжүүлэх</button>
+          <button class="spin-code-btn" id="spinCodeBtn">ACTIVATE</button>
         </div>
-        <div class="spin-code-msg" id="spinCodeMsg">
-          Зөвхөн төлбөр төлсний дараа л spin хийх боломжтой.
-        </div>
+        <div class="spin-code-msg" id="spinCodeMsg">Payment required before spin activation</div>
       </div>
 
-      <button class="spin-btn" id="spinButton" disabled>
-        Хүрд эргүүлэхийн тулд код хийнэ үү
-      </button>
+      <button class="spin-btn" id="spinButton" disabled>ENTER CODE TO SPIN</button>
+      
       <div class="spin-result" id="spinResult">
-        <span class="spin-result-main">Төлбөр төлсний дараа Silver spin хийх боломжтой</span><br/>
-        <span class="spin-result-note">
-          Зөөгчтэй холбогдож төлбөрөө төлнө үү.
-        </span>
+        <span class="spin-result-main">Payment required for Silver Spin</span><br/>
+        <span class="spin-result-note">Contact staff to activate your spin after payment</span>
       </div>
 
-      <!-- Silver prize list -->
       <div class="silver-prizes" id="silverPrizes">
         <div class="silver-prizes-title">SILVER SPIN PRIZES</div>
         <div class="silver-prizes-grid" id="silverPrizesGrid"></div>
@@ -1154,11 +1428,9 @@
       <div class="spin-header">
         <div>
           <div class="spin-title gold">GOLDEN SPIN</div>
-          <div class="spin-sub">
-            1 удаа тоглоход 20,000₮ · Илүү том шагналууд · Төлбөр төлсний дараа зөөгч Golden Spin код оруулна.
-          </div>
+          <div class="spin-sub">Exclusive premium prizes · Higher value rewards · Staff activation required</div>
         </div>
-        <div class="pill">Premium Wheel</div>
+        <div class="flash-pill">Premium</div>
       </div>
 
       <div class="wheel-container">
@@ -1167,126 +1439,131 @@
         <div class="wheel-pointer"></div>
       </div>
 
-      <!-- Spin Code Input (Gold) -->
       <div class="spin-code-panel" id="goldCodePanel">
-        <div style="font-size: 13px; color: var(--text-muted);">
-          Golden Spin-д тоглохын өмнө зөөгч код оруулна.
-        </div>
+        <div style="font-size: 14px; color: var(--lux-gold); font-weight: 600;">PREMIUM ACTIVATION</div>
         <div class="spin-code-input">
           <input type="password" id="goldCodeInput" maxlength="6" placeholder="000000" />
-          <button class="spin-code-btn" id="goldCodeBtn">Хүрд идэвхжүүлэх</button>
+          <button class="spin-code-btn" id="goldCodeBtn">ACTIVATE</button>
         </div>
-        <div class="spin-code-msg" id="goldCodeMsg">
-          Төлбөр төлсний дараа Golden spin идэвхжинэ.
-        </div>
+        <div class="spin-code-msg" id="goldCodeMsg">Golden Spin requires staff activation</div>
       </div>
 
-      <button class="spin-btn gold" id="goldSpinButton" disabled>
-        Golden Spin хийхийн тулд код хийнэ үү
-      </button>
+      <button class="spin-btn gold" id="goldSpinButton" disabled>ENTER CODE FOR GOLDEN SPIN</button>
+      
       <div class="spin-result" id="goldSpinResult">
-        <span class="spin-result-main">Premium шагналуудаа шалгах уу?</span><br/>
-        <span class="spin-result-note">
-          Төлбөрөө төлөөд Golden Spin хийж үзээрэй.
-        </span>
+        <span class="spin-result-main">Premium Golden Spin</span><br/>
+        <span class="spin-result-note">Higher stakes, better rewards - activate with staff</span>
       </div>
 
-      <!-- Golden prize list -->
       <div class="gold-prizes-title">GOLDEN SPIN PRIZES</div>
       <div class="premium-prizes-grid" id="goldPrizesGrid"></div>
     </div>
   </div>
 
-  <!-- Admin bar -->
+  <!-- Hidden Admin System -->
   <div class="admin-bar">
-    Staff only: <span class="admin-link" id="adminToggleLink">enter admin code</span>
+    System Status: <span id="connectionStatus">Online</span>
   </div>
 
   <div class="admin-panel" id="adminPanel">
-    <div><strong>Admin panel</strong> · for owner / manager / Ndoro Ajeng.</div>
-    <div class="admin-badge" id="adminStatus">Locked</div>
+    <div>STAFF CONTROL PANEL</div>
+    <div class="admin-badge" id="adminStatus">ACCESS LOCKED</div>
 
     <div class="admin-row">
-      <div>Flash deals active</div>
+      <div>Flash Deals Active</div>
       <div class="switch" id="adminFlashSwitch"><div class="switch-knob"></div></div>
     </div>
 
     <div class="admin-row">
-      <div>Show spin sections</div>
+      <div>Spin Sections Visible</div>
       <div class="switch" id="adminSpinSwitch"><div class="switch-knob"></div></div>
     </div>
 
     <div class="admin-row">
-      <div>Flash duration (sec)</div>
-      <input id="adminFlashDuration" class="admin-input" type="number" min="20" max="7200" />
+      <div>Flash Duration (seconds)</div>
+      <input id="adminFlashDuration" class="admin-input" type="number" min="30" max="7200" />
     </div>
 
     <div class="admin-row">
-      <div>Discount product</div>
+      <div>Discount Product</div>
       <select id="adminDiscountProduct" class="admin-select">
-        <option value="">Select product</option>
+        <option value="">Select Product</option>
       </select>
     </div>
 
     <div class="admin-row">
-      <div>Discount percentage</div>
+      <div>Discount Percentage</div>
       <input id="adminDiscountPercent" class="admin-input" type="number" min="5" max="50" placeholder="%" />
     </div>
 
     <div class="admin-row">
-      <div>Flash preset</div>
+      <div>Silver Spin Price (₮)</div>
+      <input id="adminSilverSpinPrice" class="admin-input" type="number" min="1000" max="50000" />
+    </div>
+
+    <div class="admin-row">
+      <div>Golden Spin Price (₮)</div>
+      <input id="adminGoldSpinPrice" class="admin-input" type="number" min="1000" max="50000" />
+    </div>
+
+    <div class="admin-row">
+      <div>Quick Preset</div>
       <select id="adminFlashPreset" class="admin-select">
-        <option value="">No preset</option>
+        <option value="">Custom</option>
         <option value="Quick Boost">Quick Boost (2 min / 15%)</option>
         <option value="Happy Hour">Happy Hour (60 min / 20%)</option>
         <option value="Weekend Special">Weekend Special (120 min / 25%)</option>
       </select>
     </div>
 
-    <div id="adminFlashSummary">
-      No flash deal configured yet.
+    <div class="preset-buttons">
+      <button class="preset-btn weekday" data-preset="weekday">Weekday</button>
+      <button class="preset-btn weekend" data-preset="weekend">Weekend</button>
+      <button class="preset-btn party" data-preset="party">Party</button>
     </div>
 
-    <div style="margin-top:6px;font-size:10px;color:var(--text-muted);">
-      Note: discount product & percent are for staff logic. Guests only see that a flash sale is active and the timer.
-    </div>
+    <div id="adminFlashSummary">No active flash deal configuration</div>
   </div>
 
   <div class="admin-panel" id="adminLoginPanel" style="display:none;">
-    <div><strong>Enter admin code</strong> · 6 digits</div>
+    <div>STAFF ACCESS REQUIRED</div>
     <div class="admin-login">
       <input type="password" id="adminCodeInput" maxlength="6" placeholder="000000" />
-      <button id="adminCodeBtn">Unlock</button>
+      <button id="adminCodeBtn">UNLOCK</button>
     </div>
-    <div id="adminLoginMsg" style="margin-top:4px;font-size:11px;color:var(--danger);display:none;">
-      Wrong code.
+    <div id="adminLoginMsg" style="margin-top:10px;font-size:12px;color:var(--danger);display:none;text-align:center;">
+      Invalid access code
     </div>
   </div>
 
   <div class="footer">
-    Энэхүү QR MENU нь зөвхөн үзэх, нэмэлт саналууд болон хямдралын саналд зориулагдсан бөгөөд,
-    захиалга болон төлбөрийг үргэлж таны үйлчилгээний ажилтан хариуцна.
+    This digital menu is for viewing and promotional purposes only.<br>
+    All orders and payments must be processed through our service staff.<br>
+    © 2024 Coco Banana Premium Nightclub Experience
   </div>
 </div>
 
-<!-- Quick navigation floating buttons -->
+<!-- Quick Navigation -->
 <div class="quick-nav">
-  <button onclick="scrollToSection('cocktails')" aria-label="Go to cocktails">🍸</button>
-  <button onclick="scrollToSection('beer')" aria-label="Go to beer">🍺</button>
-  <button onclick="scrollToSection('whiskey')" aria-label="Go to whiskey">🥃</button>
-  <button onclick="scrollToSection('snacks')" aria-label="Go to snacks">🥨</button>
+  <button onclick="scrollToSection('cocktails')" aria-label="Cocktails">🍸</button>
+  <button onclick="scrollToSection('beer')" aria-label="Beer">🍺</button>
+  <button onclick="scrollToSection('whiskey')" aria-label="Whiskey">🥃</button>
+  <button onclick="scrollToSection('snacks')" aria-label="Snacks">🥨</button>
+  <button id="scrollTopBtn" onclick="smoothScrollToTop()" aria-label="Back to top">⬆</button>
 </div>
 
 <script>
-/* ========= VERSIONED CACHE FOR LOCAL STATE ========= */
-const CACHE_VERSION = '1.0.6';
-const STATE_KEY = 'cocoMenuState';
-const VERSION_KEY = 'cocoMenuCacheVersion';
-
-if (localStorage.getItem(VERSION_KEY) !== CACHE_VERSION) {
-  localStorage.removeItem(STATE_KEY);
-  localStorage.setItem(VERSION_KEY, CACHE_VERSION);
-}
+/* ========= FIREBASE INIT ========= */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 /* ========= SECURE SPIN CONFIG ========= */
 const SPIN_ACTIVATION_CODE = '032328';
@@ -1295,10 +1572,7 @@ let isGoldSpinActivated = false;
 
 /* ========= DATA: MENU ========= */
 const MENU_DATA = [
-  {
-    category: 'cocktails',
-    title: 'Cocktails',
-    tag: 'Premium mixed drinks',
+  { category: 'cocktails', title: 'Cocktails', tag: 'Premium mixed drinks',
     items: [
       { name: 'Margarita', price: 34000, type: 'cocktail', popular: true },
       { name: 'Negroni', price: 34000, type: 'cocktail' },
@@ -1306,10 +1580,7 @@ const MENU_DATA = [
       { name: 'Manhattan', price: 34000, type: 'cocktail' },
     ]
   },
-  {
-    category: 'beer',
-    title: 'Beer',
-    tag: 'Chilled beers & soju',
+  { category: 'beer', title: 'Beer', tag: 'Chilled beers & soju',
     items: [
       { name: 'Altangobi', price: 11000, type: 'beer', popular: true },
       { name: 'Tiger', price: 11000, type: 'beer' },
@@ -1325,10 +1596,7 @@ const MENU_DATA = [
       { name: 'Soju', price: 30000, type: 'beer' },
     ]
   },
-  {
-    category: 'whiskey',
-    title: 'Whiskey',
-    tag: 'Shot / double / bottle',
+  { category: 'whiskey', title: 'Whiskey', tag: 'Shot / double / bottle',
     items: [
       { name: 'Wild Turkey', priceText: '14K / 28K / 280K', type: 'spirit' },
       { name: 'Ballantines', priceText: '14K / 28K / 280K', type: 'spirit' },
@@ -1339,10 +1607,7 @@ const MENU_DATA = [
       { name: 'Glenmorangie', priceText: '30K / 60K / 420K', type: 'spirit' },
     ]
   },
-  {
-    category: 'vodka',
-    title: 'Vodka',
-    tag: 'Shot / bottle',
+  { category: 'vodka', title: 'Vodka', tag: 'Shot / bottle',
     items: [
       { name: 'Eden 700ml', priceText: '17K / 119K', type: 'spirit' },
       { name: 'Velvet 700ml', priceText: '17K / 119K', type: 'spirit' },
@@ -1355,10 +1620,7 @@ const MENU_DATA = [
       { name: 'Zubrowka Biala 700ml', priceText: '35K / 220K', type: 'spirit' },
     ]
   },
-  {
-    category: 'gin',
-    title: 'Gin',
-    tag: 'Shot / bottle',
+  { category: 'gin', title: 'Gin', tag: 'Shot / bottle',
     items: [
       { name: 'Barrister 700ml', priceText: '26K / 182K', type: 'spirit' },
       { name: 'Gordon\'s 1L', priceText: '27K / 270K', type: 'spirit' },
@@ -1367,46 +1629,29 @@ const MENU_DATA = [
       { name: 'Bialowieski Malina 700ml', priceText: '27K / 192K', type: 'spirit' },
     ]
   },
-  {
-    category: 'tequila',
-    title: 'Tequila',
-    tag: 'Shot / bottle',
+  { category: 'tequila', title: 'Tequila', tag: 'Shot / bottle',
     items: [
       { name: 'Sierra', priceText: '24K / 240K', type: 'spirit' },
       { name: 'Olmega', priceText: '26K / 182K', type: 'spirit' },
     ]
   },
-  {
-    category: 'cognac',
-    title: 'Cognac',
-    tag: 'Premium sips',
+  { category: 'cognac', title: 'Cognac', tag: 'Premium sips',
     items: [
       { name: 'Hennessy V.S 700ml', priceText: '65K / 455K', type: 'spirit' },
       { name: 'Hennessy V.S.O.P 700ml', priceText: '100K / 700K', type: 'spirit' },
     ]
   },
-  {
-    category: 'wine',
-    title: 'Wine',
-    tag: 'Glass / bottle',
-    items: [
-      { name: 'Maison Castle', priceText: '13K / 97.5K', type: 'spirit' },
-    ]
+  { category: 'wine', title: 'Wine', tag: 'Glass / bottle',
+    items: [ { name: 'Maison Castle', priceText: '13K / 97.5K', type: 'spirit' } ]
   },
-  {
-    category: 'liquor',
-    title: 'Liquor',
-    tag: 'Shot / bottle',
+  { category: 'liquor', title: 'Liquor', tag: 'Shot / bottle',
     items: [
       { name: 'Balley\'s 1L', priceText: '18K / 180K', type: 'spirit' },
       { name: 'Grandmarnier 700ml', priceText: '40K / 280K', type: 'spirit' },
       { name: 'Jägermeister 700ml', priceText: '27K / 189K', type: 'spirit' },
     ]
   },
-  {
-    category: 'sets',
-    title: 'Set Packages',
-    tag: 'Party bundles',
+  { category: 'sets', title: 'Set Packages', tag: 'Party bundles',
     items: [
       { name: 'Eden Vodka Set', price: 217000, type: 'set' },
       { name: 'Velvet Vodka Set', price: 217000, type: 'set' },
@@ -1422,10 +1667,7 @@ const MENU_DATA = [
       { name: 'Chivas 18 Years Whiskey Set', price: 498000, type: 'set' },
     ]
   },
-  {
-    category: 'snacks',
-    title: 'Snacks',
-    tag: 'Perfect with drinks',
+  { category: 'snacks', title: 'Snacks', tag: 'Perfect with drinks',
     items: [
       { name: 'Chips', price: 15000, type: 'snack', popular: true },
       { name: 'Nuts', price: 7000, type: 'snack' },
@@ -1434,10 +1676,7 @@ const MENU_DATA = [
       { name: 'Toffifee', price: 15000, type: 'snack' },
     ]
   },
-  {
-    category: 'softdrinks',
-    title: 'Soft Drinks',
-    tag: 'Mixers & refreshments',
+  { category: 'softdrinks', title: 'Soft Drinks', tag: 'Mixers & refreshments',
     items: [
       { name: 'Juice (Orange, Apple, Multifruit)', price: 4000, type: 'softdrink' },
       { name: 'Bonaqua', price: 5000, type: 'softdrink' },
@@ -1449,27 +1688,23 @@ const MENU_DATA = [
   },
 ];
 
-/* ========= FLASH CONFIG & STATE ========= */
+/* ========= FLASH STATE ========= */
 let FLASH_DEALS_ACTIVE = false;
 let FLASH_DURATION_SECONDS = 60;
 let CURRENT_FLASH_ITEM = null;
 let CURRENT_DISCOUNT_PERCENT = 10;
+let SHOW_SPIN = true;
 
 let flashTimeLeft = FLASH_DURATION_SECONDS;
 let flashInterval = null;
-let SHOW_SPIN = true;
 
-/* ========= SILVER SPIN PRIZES (tuned more for profit) ========= */
-// ≈ 4% big, 19% mid, 77% low (weights relative)
+/* ========= PRIZES ========= */
 const SILVER_SPIN_PRIZES = [
-  // BIG (Lower percentage as requested)
   { label: 'FREE Soju', tier: 'big', weight: 4, value: '≈30,000₮' },
   { label: 'FREE Cocktail', tier: 'big', weight: 4, value: '≈34,000₮' },
   { label: 'FREE Merci Chocolate', tier: 'big', weight: 6, value: '≈35,000₮' },
   { label: 'FREE Corona Beer', tier: 'big', weight: 6, value: '≈17,000₮' },
   { label: 'FREE Shot', tier: 'big', weight: 5, value: '≈17,000₮' },
-
-  // MID
   { label: 'FREE Altangobi Beer', tier: 'mid', weight: 22 },
   { label: 'FREE Red Bull Blue', tier: 'mid', weight: 22 },
   { label: 'FREE Chips', tier: 'mid', weight: 32 },
@@ -1477,8 +1712,6 @@ const SILVER_SPIN_PRIZES = [
   { label: 'FREE Mixed Nuts', tier: 'mid', weight: 40 },
   { label: 'FREE Soft Drink', tier: 'mid', weight: 22 },
   { label: 'Next Spin 50% OFF', tier: 'mid', weight: 26 },
-
-  // LOW
   { label: 'FREE Gum', tier: 'low', weight: 90 },
   { label: 'FREE Juice', tier: 'low', weight: 90 },
   { label: 'FREE Bonaqua', tier: 'low', weight: 90 },
@@ -1487,23 +1720,17 @@ const SILVER_SPIN_PRIZES = [
   { label: 'Try Again', tier: 'low', weight: 230 },
 ];
 
-/* ========= GOLDEN SPIN PRIZES ========= */
 const GOLDEN_SPIN_PRIZES = [
-  // BIG PRIZES (Lower percentage as requested)
   { label: 'FREE Cocktail', tier: 'big', weight: 4, value: '≈34,000₮' },
   { label: 'FREE Soju', tier: 'big', weight: 4, value: '≈30,000₮' },
   { label: 'FREE Corona 2-pack', tier: 'big', weight: 3, value: '≈34,000₮' },
   { label: 'FREE Merci Chocolate', tier: 'big', weight: 3, value: '≈35,000₮' },
   { label: 'FREE Whiskey Shot + Beer', tier: 'big', weight: 2, value: '≈29,000₮' },
-
-  // PREMIUM PRIZES
   { label: 'FREE Asahi', tier: 'normal', weight: 20, value: '≈15,000₮' },
   { label: 'FREE Blue Moon', tier: 'normal', weight: 20, value: '≈13,000₮' },
   { label: 'FREE Red Bull Blue', tier: 'normal', weight: 15 },
   { label: 'FREE Chips', tier: 'normal', weight: 15 },
   { label: 'FREE Altangobi Beer', tier: 'normal', weight: 15 },
-
-  // STANDARD
   { label: 'FREE Corona', tier: 'normal', weight: 120 },
   { label: 'FREE Asahi', tier: 'normal', weight: 100 },
   { label: 'FREE Blue Moon', tier: 'normal', weight: 100 },
@@ -1513,7 +1740,7 @@ const GOLDEN_SPIN_PRIZES = [
   { label: 'Try Again', tier: 'normal', weight: 80 }
 ];
 
-/* ========= FLASH PRESETS ========= */
+/* ========= PRESETS ========= */
 const FLASH_PRESETS = [
   { name: "Quick Boost", duration: 120, discount: 15 },
   { name: "Happy Hour", duration: 3600, discount: 20 },
@@ -1521,20 +1748,18 @@ const FLASH_PRESETS = [
 ];
 
 /* ========= HELPERS ========= */
-
-function formatPrice(value) {
-  return (value / 1000) + 'K';
-}
+function formatPrice(value) { return (value / 1000) + 'K'; }
 
 function scrollToSection(category) {
   const section = document.querySelector(`.section[data-section="${category}"]`);
-  if (section) {
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function smoothScrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* ========= RENDER MENU ========= */
-
 const menuContainer = document.getElementById('menuContainer');
 
 function renderMenu() {
@@ -1563,8 +1788,7 @@ function renderMenu() {
 
       let priceText = item.priceText || (item.price ? formatPrice(item.price) + '₮' : '');
       const basePriceAttr = item.price ? `data-base-price="${item.price}"` : '';
-      
-      // Apply discount if this is the flash deal item
+
       if (FLASH_DEALS_ACTIVE && CURRENT_FLASH_ITEM === item.name && item.price) {
         const discountedPrice = Math.round(item.price * (1 - CURRENT_DISCOUNT_PERCENT / 100));
         priceText = `<span class="strike">${formatPrice(item.price)}₮</span> <span class="discount">${formatPrice(discountedPrice)}₮</span>`;
@@ -1572,9 +1796,7 @@ function renderMenu() {
 
       card.innerHTML = `
         <div class="card-main">
-          <div>
-            <div class="card-name">${item.name}</div>
-          </div>
+          <div><div class="card-name">${item.name}</div></div>
           <div class="card-price" ${basePriceAttr}>${priceText}</div>
         </div>
       `;
@@ -1595,27 +1817,21 @@ function renderMenu() {
 }
 
 /* ========= TABS ========= */
-
 const tabsEl = document.getElementById('tabs');
-
 function setActiveTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
   document.querySelectorAll('.section').forEach(sec => {
     const cat = sec.dataset.section;
     sec.style.display = (tab === 'all' || tab === cat) ? '' : 'none';
   });
 }
-
 tabsEl.addEventListener('click', e => {
   const btn = e.target.closest('.tab-btn');
   if (!btn) return;
   setActiveTab(btn.dataset.tab);
 });
 
-/* ========= FLASH DEALS ========= */
-
+/* ========= FLASH UI ========= */
 const flashItemName = document.getElementById('flashItemName');
 const flashItemMeta = document.getElementById('flashItemMeta');
 const flashTimerValue = document.getElementById('flashTimerValue');
@@ -1632,18 +1848,18 @@ function updateFlashUI() {
   flashBar.classList.remove('active', 'ending-soon');
 
   if (!FLASH_DEALS_ACTIVE) {
-    flashItemName.textContent = 'Одоогоор хямдралгүй';
-    flashItemMeta.textContent = 'Хямдрал идэвхжих үед энд мэдээлэл гарна.';
+    flashItemName.textContent = 'No active deals';
+    flashItemMeta.textContent = 'Check back for exclusive offers';
     flashTimerValue.textContent = '--:--';
     flashMeterFill.style.transform = 'scaleX(0)';
     flashBar.classList.add('inactive');
     return;
   }
 
-  flashItemName.textContent = CURRENT_FLASH_ITEM || 'Хямдрал зарлагдлаа';
-  flashItemMeta.textContent = `${CURRENT_DISCOUNT_PERCENT}% хямдралтай`;
+  flashItemName.textContent = CURRENT_FLASH_ITEM || 'Flash Deal Active';
+  flashItemMeta.textContent = `${CURRENT_DISCOUNT_PERCENT}% discount`;
   flashTimerValue.textContent = formatTime(flashTimeLeft);
-  const progress = flashTimeLeft / FLASH_DURATION_SECONDS;
+  const progress = Math.max(0, flashTimeLeft / FLASH_DURATION_SECONDS);
   flashMeterFill.style.transform = 'scaleX(' + progress + ')';
   flashBar.classList.remove('inactive');
   flashBar.classList.add('active');
@@ -1658,35 +1874,34 @@ function startFlashLoop() {
 
   if (!FLASH_DEALS_ACTIVE) {
     updateFlashUI();
-    renderMenu(); // Re-render menu to remove discounts
+    renderMenu();
     return;
   }
 
   flashTimeLeft = FLASH_DURATION_SECONDS;
   updateFlashUI();
-  renderMenu(); // Re-render menu to show discounts
+  renderMenu();
 
   flashInterval = setInterval(() => {
     if (!FLASH_DEALS_ACTIVE) {
       updateFlashUI();
-      renderMenu(); // Re-render menu to remove discounts
+      renderMenu();
       return;
     }
     flashTimeLeft--;
     if (flashTimeLeft <= 0) {
       FLASH_DEALS_ACTIVE = false;
-      saveState(true);
       updateFlashUI();
-      renderMenu(); // Re-render menu to remove discounts
+      renderMenu();
       clearInterval(flashInterval);
+      saveFirebaseState({ flashActive: false });
     } else {
       updateFlashUI();
     }
   }, 1000);
 }
 
-/* ========= SPIN DOM ELEMENTS ========= */
-
+/* ========= SPIN DOM ========= */
 const spinButton = document.getElementById('spinButton');
 const spinResultEl = document.getElementById('spinResult');
 const spinWheel = document.getElementById('spinWheel');
@@ -1706,12 +1921,9 @@ const goldCodeMsg = document.getElementById('goldCodeMsg');
 const goldPrizesGridEl = document.getElementById('goldPrizesGrid');
 
 /* ========= SPIN HELPERS ========= */
-
 function buildPrizePool(prizes) {
   const pool = [];
-  prizes.forEach(prize => {
-    for (let i = 0; i < prize.weight; i++) pool.push(prize);
-  });
+  prizes.forEach(prize => { for (let i = 0; i < prize.weight; i++) pool.push(prize); });
   return pool;
 }
 const SILVER_SPIN_POOL = buildPrizePool(SILVER_SPIN_PRIZES);
@@ -1722,7 +1934,6 @@ function randomFromPool(pool) {
   return pool[idx];
 }
 
-/* Render Silver prize grid with highlighted big prizes */
 function renderSilverPrizeGrid() {
   silverPrizesGridEl.innerHTML = '';
   SILVER_SPIN_PRIZES.forEach(prize => {
@@ -1736,7 +1947,6 @@ function renderSilverPrizeGrid() {
   });
 }
 
-/* Render Golden prizes grid */
 function renderGoldPrizeGrid() {
   goldPrizesGridEl.innerHTML = '';
   GOLDEN_SPIN_PRIZES.forEach(prize => {
@@ -1750,61 +1960,48 @@ function renderGoldPrizeGrid() {
   });
 }
 
-/* ========= SILVER SPIN LOGIC ========= */
-
+/* ========= SILVER SPIN ========= */
 function activateSilverSpin() {
   isSilverSpinActivated = true;
   spinButton.disabled = false;
-  spinButton.textContent = 'Хүрд эргүүлэх';
+  spinButton.textContent = 'SPIN THE WHEEL';
   spinCodeInput.value = '';
-  spinCodeMsg.textContent = 'Silver Spin идэвхжсэн · Нэг удаагийн spin.';
+  spinCodeMsg.textContent = 'Silver Spin activated · One-time spin.';
   spinCodeMsg.className = 'spin-code-msg spin-code-success';
-
-  setTimeout(() => {
-    spinCodePanel.style.display = 'none';
-  }, 3000);
+  setTimeout(() => { spinCodePanel.style.display = 'none'; }, 3000);
 }
-
 function deactivateSilverSpin() {
   isSilverSpinActivated = false;
   spinButton.disabled = true;
-  spinButton.textContent = 'Хүрд эргүүлэхийн тулд код хийнэ үү';
+  spinButton.textContent = 'ENTER CODE TO SPIN';
   spinCodePanel.style.display = '';
-  spinCodeMsg.textContent = 'Зөвхөн төлбөр төлсний дараа л spin хийх боломжтой.';
+  spinCodeMsg.textContent = 'Payment required before spin activation';
   spinCodeMsg.className = 'spin-code-msg';
 }
-
 spinCodeBtn.addEventListener('click', () => {
   const code = spinCodeInput.value.trim();
-  if (code === SPIN_ACTIVATION_CODE) {
-    activateSilverSpin();
-  } else {
-    spinCodeMsg.textContent = 'Буруу код. Зөөгчтэй холбогдон уу.';
+  if (code === SPIN_ACTIVATION_CODE) activateSilverSpin();
+  else {
+    spinCodeMsg.textContent = 'Invalid code. Please contact staff.';
     spinCodeMsg.className = 'spin-code-msg spin-code-error';
   }
 });
-
-spinCodeInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') spinCodeBtn.click();
-});
+spinCodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') spinCodeBtn.click(); });
 
 spinButton.addEventListener('click', () => {
   if (!isSilverSpinActivated || spinButton.disabled) return;
-
-  spinButton.disabled = true;
-  spinButton.classList.add('spinning');
+  spinButton.disabled = true; spinButton.classList.add('spinning');
   spinWheel.classList.add('spinning');
-  spinButton.innerHTML = `<span class="loading-spinner"></span> Эргэж байна...`;
+  spinButton.innerHTML = `<span class="loading-spinner"></span> Spinning...`;
 
   spinResultEl.innerHTML = `
-    <span class="spin-result-main">Эргэж байна...</span><br/>
-    <span class="spin-result-note">Амжилт хүсье!</span>
+    <span class="spin-result-main">Spinning...</span><br/>
+    <span class="spin-result-note">Good luck!</span>
   `;
 
   let ticks = 0;
-  const maxTicks = 25; // Increased for longer animation
-  const tickInterval = 150; // Slower interval
-
+  const maxTicks = 25;
+  const tickInterval = 150;
   const tickTimer = setInterval(() => {
     ticks++;
     const tempPrize = randomFromPool(SILVER_SPIN_POOL);
@@ -1812,117 +2009,88 @@ spinButton.addEventListener('click', () => {
       <span class="spin-result-main">${tempPrize.label}</span><br/>
       <span class="spin-result-note">...</span>
     `;
-
     if (ticks >= maxTicks) {
       clearInterval(tickTimer);
       const prize = randomFromPool(SILVER_SPIN_POOL);
-
-      let tierClass = 'low';
-      let prefix = 'Үр дүн';
-      if (prize.tier === 'big') {
-        tierClass = 'big';
-        prefix = 'BIG WIN 🎉';
-      } else if (prize.tier === 'mid') {
-        tierClass = 'mid';
-        prefix = 'Win!';
-      }
-
-      const valueText = (prize.tier === 'big' && prize.value)
-        ? ` (${prize.value})`
-        : '';
-
+      let tierClass = 'low', prefix = 'Result';
+      if (prize.tier === 'big') { tierClass = 'big'; prefix = 'BIG WIN 🎉'; }
+      else if (prize.tier === 'mid') { tierClass = 'mid'; prefix = 'Win!'; }
+      const valueText = (prize.value) ? ` (${prize.value})` : '';
       spinResultEl.innerHTML = `
         <span class="spin-result-main ${tierClass}">${prefix}: ${prize.label}${valueText}</span><br/>
-        <span class="spin-result-note">Дүнгээ зөөгчид үзүүлээд шагналаа аваарай.</span>
+        <span class="spin-result-note">Show staff to claim your prize.</span>
       `;
-
       setTimeout(() => {
         deactivateSilverSpin();
         spinButton.classList.remove('spinning');
         spinWheel.classList.remove('spinning');
-        spinButton.textContent = 'Хүрд эргүүлэхийн тулд код хийнэ үү';
+        spinButton.textContent = 'ENTER CODE TO SPIN';
       }, 4000);
     }
   }, tickInterval);
 });
 
-/* ========= GOLDEN SPIN LOGIC ========= */
-
+/* ========= GOLDEN SPIN ========= */
 let goldenSpinDiscountActive = false;
-
 function activateGoldSpin() {
   isGoldSpinActivated = true;
   goldSpinButton.disabled = false;
-  goldSpinButton.textContent = 'Golden Spin · 20,000₮';
+  goldSpinButton.textContent = 'GOLDEN SPIN · 20,000₮';
   goldCodeInput.value = '';
-  goldCodeMsg.textContent = 'Golden Spin идэвхжсэн · Нэг удаагийн spin.';
+  goldCodeMsg.textContent = 'Golden Spin activated · One-time spin.';
   goldCodeMsg.className = 'spin-code-msg spin-code-success';
-
-  setTimeout(() => {
-    goldCodePanel.style.display = 'none';
-  }, 3000);
+  setTimeout(() => { goldCodePanel.style.display = 'none'; }, 3000);
 }
-
 function deactivateGoldSpin() {
   isGoldSpinActivated = false;
   goldSpinButton.disabled = true;
-  goldSpinButton.textContent = 'Golden Spin хийхийн тулд код хийнэ үү';
+  goldSpinButton.textContent = 'ENTER CODE FOR GOLDEN SPIN';
   goldSpinButton.classList.remove('discounted');
   goldSpinButton.style.background = '';
   goldCodePanel.style.display = '';
-  goldCodeMsg.textContent = 'Төлбөр төлсний дараа Golden spin идэвхжинэ.';
+  goldCodeMsg.textContent = 'Golden Spin requires staff activation';
   goldCodeMsg.className = 'spin-code-msg';
   goldenSpinDiscountActive = false;
 }
-
 goldCodeBtn.addEventListener('click', () => {
   const code = goldCodeInput.value.trim();
-  if (code === SPIN_ACTIVATION_CODE) {
-    activateGoldSpin();
-  } else {
-    goldCodeMsg.textContent = 'Буруу код. Зөөгчтэй шалгана уу.';
+  if (code === SPIN_ACTIVATION_CODE) activateGoldSpin();
+  else {
+    goldCodeMsg.textContent = 'Invalid code. Please contact staff.';
     goldCodeMsg.className = 'spin-code-msg spin-code-error';
   }
 });
-
-goldCodeInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') goldCodeBtn.click();
-});
+goldCodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') goldCodeBtn.click(); });
 
 function applyGoldenSpinDiscountOnce() {
-  const originalText = 'Golden Spin · 20,000₮';
-  const discountText = 'Golden Spin · 10,000₮ 🔥';
-
+  const originalText = 'GOLDEN SPIN · 20,000₮';
+  const discountText = 'GOLDEN SPIN · 10,000₮ 🔥';
   goldenSpinDiscountActive = true;
   goldSpinButton.textContent = discountText;
-  goldSpinButton.style.background = 'linear-gradient(135deg, #f97316, #facc15)';
+  goldSpinButton.style.background = 'linear-gradient(135deg, #ff6b00, #ffd700)';
   goldSpinButton.classList.add('discounted');
-
   setTimeout(() => {
     goldenSpinDiscountActive = false;
     goldSpinButton.textContent = originalText;
     goldSpinButton.style.background = '';
     goldSpinButton.classList.remove('discounted');
-  }, 60000); // 1 minute discount window
+  }, 60000);
 }
 
 goldSpinButton.addEventListener('click', () => {
   if (!isGoldSpinActivated || goldSpinButton.disabled) return;
-
-  goldSpinButton.disabled = true;
-  goldSpinButton.classList.add('spinning');
+  goldSpinButton.disabled = true; goldSpinButton.classList.add('spinning');
   goldenWheel.classList.add('spinning');
-  goldSpinButton.innerHTML = `<span class="loading-spinner"></span> Эргэж байна...`;
+  goldSpinButton.innerHTML = `<span class="loading-spinner"></span> Spinning...`;
 
   goldSpinResultEl.innerHTML = `
-    <span class="spin-result-main">Эргэж байна...</span><br/>
-    <span class="spin-result-note">Амжилт хүсье!</span>
+    <span class="spin-result-main">Spinning...</span><br/>
+    <span class="spin-result-note">Good luck!</span>
   `;
 
   let ticks = 0;
-  const maxTicks = 30; // Increased for longer animation
-  const tickInterval = 150; // Slower interval
-
+  const maxTicks = 30;
+  const tickInterval = 150;
   const tickTimer = setInterval(() => {
     ticks++;
     const tempPrize = randomFromPool(GOLD_SPIN_POOL);
@@ -1930,43 +2098,29 @@ goldSpinButton.addEventListener('click', () => {
       <span class="spin-result-main">${tempPrize.label}</span><br/>
       <span class="spin-result-note">...</span>
     `;
-
     if (ticks >= maxTicks) {
       clearInterval(tickTimer);
       const prize = randomFromPool(GOLD_SPIN_POOL);
-
-      let tierClass = 'low';
-      let prefix = 'Үр дүн';
-      if (prize.tier === 'big') {
-        tierClass = 'big';
-        prefix = 'GOLD WIN 💎';
-      }
-
+      let tierClass = 'low', prefix = 'Result';
+      if (prize.tier === 'big') { tierClass = 'big'; prefix = 'GOLD WIN 💎'; }
       const valueText = prize.value ? ` (${prize.value})` : '';
-
       goldSpinResultEl.innerHTML = `
         <span class="spin-result-main ${tierClass}">${prefix}: ${prize.label}${valueText}</span><br/>
-        <span class="spin-result-note">Дүнгээ зөөгчид үзүүлж шагналаа аваарай.</span>
+        <span class="spin-result-note">Show staff to claim your prize.</span>
       `;
-
-      if (prize.label.includes('50% OFF Next Spin')) {
-        applyGoldenSpinDiscountOnce();
-      }
-
+      if (prize.label.includes('50% OFF Next Spin')) applyGoldenSpinDiscountOnce();
       setTimeout(() => {
         deactivateGoldSpin();
         goldSpinButton.classList.remove('spinning');
         goldenWheel.classList.remove('spinning');
-        goldSpinButton.textContent = 'Golden Spin хийхийн тулд код хийнэ үү';
+        goldSpinButton.textContent = 'ENTER CODE FOR GOLDEN SPIN';
       }, 4000);
     }
   }, tickInterval);
 });
 
-/* ========= ADMIN PANEL & STATE ========= */
-
+/* ========= ADMIN PANEL ========= */
 const ADMIN_CODE = '032328';
-const adminToggleLink = document.getElementById('adminToggleLink');
 const adminPanel = document.getElementById('adminPanel');
 const adminLoginPanel = document.getElementById('adminLoginPanel');
 const adminStatus = document.getElementById('adminStatus');
@@ -1980,48 +2134,70 @@ const adminCodeInput = document.getElementById('adminCodeInput');
 const adminCodeBtn = document.getElementById('adminCodeBtn');
 const adminLoginMsg = document.getElementById('adminLoginMsg');
 const adminFlashSummary = document.getElementById('adminFlashSummary');
+const connectionStatus = document.getElementById('connectionStatus');
+const logoWrap = document.querySelector('.logo-wrap');
 
-function setSwitch(el, value) {
-  if (value) el.classList.add('on');
-  else el.classList.remove('on');
+/* Hidden admin triggers (5 taps OR 5-second hold on logo) */
+let logoTapCount = 0;
+let logoTapTimeout = null;
+let logoPressTimer = null;
+
+function openAdminLogin() {
+  // If already unlocked, just show panel
+  if (adminPanel.style.display === 'block') {
+    adminLoginPanel.style.display = 'none';
+    return;
+  }
+  adminLoginPanel.style.display = 'block';
+  adminLoginMsg.style.display = 'none';
+  adminCodeInput.value = '';
+  adminCodeInput.focus();
 }
 
-function getSwitch(el) {
-  return el.classList.contains('on');
-}
-
-function saveState(broadcast = false) {
-  const state = {
-    flashActive: FLASH_DEALS_ACTIVE,
-    showSpin: SHOW_SPIN,
-    flashDuration: FLASH_DURATION_SECONDS,
-    discountProduct: CURRENT_FLASH_ITEM,
-    discountPercent: CURRENT_DISCOUNT_PERCENT
-  };
-  localStorage.setItem(STATE_KEY, JSON.stringify(state));
-  if (broadcast) {
-    localStorage.setItem('flashDealUpdate', Date.now().toString());
+function handleLogoTap() {
+  logoTapCount++;
+  clearTimeout(logoTapTimeout);
+  if (logoTapCount >= 5) {
+    logoTapCount = 0;
+    openAdminLogin();
+  } else {
+    logoTapTimeout = setTimeout(() => { logoTapCount = 0; }, 1500);
   }
 }
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STATE_KEY);
-    if (!raw) return;
-    const st = JSON.parse(raw);
-    FLASH_DEALS_ACTIVE = !!st.flashActive;
-    SHOW_SPIN = st.showSpin !== false;
-    if (st.flashDuration) FLASH_DURATION_SECONDS = st.flashDuration;
-    if (st.discountProduct) CURRENT_FLASH_ITEM = st.discountProduct;
-    if (st.discountPercent) CURRENT_DISCOUNT_PERCENT = st.discountPercent;
-  } catch (e) {
-    console.warn('State load failed', e);
+function startLogoPress(e) {
+  // prevent long-press text selection on mobile
+  if (e.type === 'touchstart') e.preventDefault();
+  if (logoPressTimer) return;
+  logoPressTimer = setTimeout(() => {
+    logoPressTimer = null;
+    openAdminLogin();
+  }, 5000);
+}
+
+function cancelLogoPress() {
+  if (logoPressTimer) {
+    clearTimeout(logoPressTimer);
+    logoPressTimer = null;
   }
 }
+
+if (logoWrap) {
+  logoWrap.addEventListener('click', handleLogoTap);
+  logoWrap.addEventListener('mousedown', startLogoPress);
+  logoWrap.addEventListener('touchstart', startLogoPress);
+  logoWrap.addEventListener('mouseup', cancelLogoPress);
+  logoWrap.addEventListener('mouseleave', cancelLogoPress);
+  logoWrap.addEventListener('touchend', cancelLogoPress);
+  logoWrap.addEventListener('touchcancel', cancelLogoPress);
+}
+
+/* Admin helpers */
+function setSwitch(el, value) { if (value) el.classList.add('on'); else el.classList.remove('on'); }
+function getSwitch(el) { return el.classList.contains('on'); }
 
 function populateProductDropdown() {
   adminDiscountProduct.innerHTML = '<option value="">Select product</option>';
-  
   MENU_DATA.forEach(section => {
     section.items.forEach(item => {
       if (item.price) {
@@ -2032,10 +2208,7 @@ function populateProductDropdown() {
       }
     });
   });
-
-  if (CURRENT_FLASH_ITEM) {
-    adminDiscountProduct.value = CURRENT_FLASH_ITEM;
-  }
+  if (CURRENT_FLASH_ITEM) adminDiscountProduct.value = CURRENT_FLASH_ITEM;
 }
 
 function updateFlashSummary() {
@@ -2055,24 +2228,15 @@ function applyFlashPreset(presetName) {
   adminFlashDuration.value = FLASH_DURATION_SECONDS;
   adminDiscountPercent.value = CURRENT_DISCOUNT_PERCENT;
   updateFlashSummary();
-  saveState(true);
+  saveFirebaseState({
+    flashDuration: FLASH_DURATION_SECONDS,
+    discountPercent: CURRENT_DISCOUNT_PERCENT
+  });
 }
 
 adminFlashPreset.addEventListener('change', () => {
   const val = adminFlashPreset.value;
   if (val) applyFlashPreset(val);
-});
-
-adminToggleLink.addEventListener('click', () => {
-  if (adminPanel.style.display === 'block' || adminLoginPanel.style.display === 'block') {
-    adminPanel.style.display = 'none';
-    adminLoginPanel.style.display = 'none';
-    adminToggleLink.textContent = 'enter admin code';
-  } else {
-    adminPanel.style.display = 'none';
-    adminLoginPanel.style.display = 'block';
-    adminToggleLink.textContent = 'close admin';
-  }
 });
 
 adminCodeBtn.addEventListener('click', () => {
@@ -2089,10 +2253,14 @@ adminCodeBtn.addEventListener('click', () => {
   }
 });
 
+adminCodeInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') adminCodeBtn.click();
+});
+
 adminFlashSwitch.addEventListener('click', () => {
   setSwitch(adminFlashSwitch, !getSwitch(adminFlashSwitch));
   FLASH_DEALS_ACTIVE = getSwitch(adminFlashSwitch);
-  saveState(true);
+  saveFirebaseState({ flashActive: FLASH_DEALS_ACTIVE });
   startFlashLoop();
 });
 
@@ -2101,14 +2269,14 @@ adminSpinSwitch.addEventListener('click', () => {
   SHOW_SPIN = getSwitch(adminSpinSwitch);
   document.getElementById('silverSpinSection').style.display = SHOW_SPIN ? '' : 'none';
   document.getElementById('goldSpinSection').style.display = SHOW_SPIN ? '' : 'none';
-  saveState();
+  saveFirebaseState({ showSpin: SHOW_SPIN });
 });
 
 adminFlashDuration.addEventListener('change', () => {
   const v = parseInt(adminFlashDuration.value, 10);
   if (!isNaN(v) && v >= 20 && v <= 7200) {
     FLASH_DURATION_SECONDS = v;
-    saveState(true);
+    saveFirebaseState({ flashDuration: FLASH_DURATION_SECONDS });
     if (FLASH_DEALS_ACTIVE) startFlashLoop();
     updateFlashSummary();
   }
@@ -2116,7 +2284,7 @@ adminFlashDuration.addEventListener('change', () => {
 
 adminDiscountProduct.addEventListener('change', () => {
   CURRENT_FLASH_ITEM = adminDiscountProduct.value || null;
-  saveState(true);
+  saveFirebaseState({ discountProduct: CURRENT_FLASH_ITEM });
   updateFlashSummary();
 });
 
@@ -2124,56 +2292,115 @@ adminDiscountPercent.addEventListener('change', () => {
   const v = parseInt(adminDiscountPercent.value, 10);
   if (!isNaN(v) && v >= 5 && v <= 50) {
     CURRENT_DISCOUNT_PERCENT = v;
-    saveState(true);
+    saveFirebaseState({ discountPercent: CURRENT_DISCOUNT_PERCENT });
     updateFlashSummary();
   }
 });
 
-/* ========= MULTI-TAB SYNC ========= */
+/* ========= FIRESTORE STATE MANAGEMENT ========= */
+const STATE_COLLECTION = 'menuState';
+const STATE_DOC_ID = 'currentState';
+const loadingSkeletonEl = document.getElementById('loadingSkeleton');
 
-window.addEventListener('storage', (e) => {
-  if (e.key === STATE_KEY || e.key === 'flashDealUpdate') {
-    loadState();
-    setSwitch(adminFlashSwitch, FLASH_DEALS_ACTIVE);
-    setSwitch(adminSpinSwitch, SHOW_SPIN);
-    document.getElementById('silverSpinSection').style.display = SHOW_SPIN ? '' : 'none';
-    document.getElementById('goldSpinSection').style.display = SHOW_SPIN ? '' : 'none';
-    adminFlashDuration.value = FLASH_DURATION_SECONDS;
-    adminDiscountPercent.value = CURRENT_DISCOUNT_PERCENT;
-    if (CURRENT_FLASH_ITEM && adminDiscountProduct.options.length) {
-      adminDiscountProduct.value = CURRENT_FLASH_ITEM;
+async function loadFirebaseState() {
+  loadingSkeletonEl.style.display = 'block';
+  if (connectionStatus) connectionStatus.textContent = 'Syncing...';
+  try {
+    const docRef = db.collection(STATE_COLLECTION).doc(STATE_DOC_ID);
+    const snap = await docRef.get();
+    if (snap.exists) {
+      const st = snap.data();
+      applyFirebaseStateToVars(st);
+      updateUIFromFirebase();
+    } else {
+      const defaultState = {
+        flashActive: false,
+        showSpin: true,
+        flashDuration: 60,
+        discountProduct: null,
+        discountPercent: 10,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      await docRef.set(defaultState, { merge: true });
+      applyFirebaseStateToVars(defaultState);
+      updateUIFromFirebase();
     }
-    updateFlashSummary();
-    updateFlashUI();
-    renderMenu();
+    loadingSkeletonEl.style.display = 'none';
+    if (connectionStatus) connectionStatus.textContent = 'Online';
+  } catch (err) {
+    console.error('Error loading Firestore state:', err);
+    loadingSkeletonEl.style.display = 'none';
+    if (connectionStatus) connectionStatus.textContent = 'Offline (menu still works)';
+    updateUIFromFirebase();
   }
-});
+}
 
-/* ========= INIT ========= */
+function applyFirebaseStateToVars(st) {
+  FLASH_DEALS_ACTIVE = !!st.flashActive;
+  SHOW_SPIN = st.showSpin !== false;
+  FLASH_DURATION_SECONDS = typeof st.flashDuration === 'number' ? st.flashDuration : FLASH_DURATION_SECONDS;
+  CURRENT_FLASH_ITEM = st.discountProduct || null;
+  CURRENT_DISCOUNT_PERCENT = typeof st.discountPercent === 'number' ? st.discountPercent : CURRENT_DISCOUNT_PERCENT;
+  flashTimeLeft = FLASH_DURATION_SECONDS;
+}
 
-function init() {
-  loadState();
-  renderMenu();
-  setActiveTab('all');
-
+function updateUIFromFirebase() {
   setSwitch(adminFlashSwitch, FLASH_DEALS_ACTIVE);
   setSwitch(adminSpinSwitch, SHOW_SPIN);
   adminFlashDuration.value = FLASH_DURATION_SECONDS;
   adminDiscountPercent.value = CURRENT_DISCOUNT_PERCENT;
+
   document.getElementById('silverSpinSection').style.display = SHOW_SPIN ? '' : 'none';
   document.getElementById('goldSpinSection').style.display = SHOW_SPIN ? '' : 'none';
 
-  deactivateSilverSpin();
-  deactivateGoldSpin();
-  renderSilverPrizeGrid();
-  renderGoldPrizeGrid();
-
+  renderMenu();
   updateFlashUI();
+  updateFlashSummary();
+
   if (FLASH_DEALS_ACTIVE) startFlashLoop();
 }
 
+function saveFirebaseState(patch) {
+  const docRef = db.collection(STATE_COLLECTION).doc(STATE_DOC_ID);
+  const updateObj = { ...patch, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+  return docRef.set(updateObj, { merge: true });
+}
+
+function setupRealtimeListener() {
+  db.collection(STATE_COLLECTION).doc(STATE_DOC_ID)
+    .onSnapshot((snap) => {
+      if (!snap.exists) return;
+      const st = snap.data();
+      applyFirebaseStateToVars(st);
+      updateUIFromFirebase();
+      if (connectionStatus) connectionStatus.textContent = 'Online';
+    }, (err) => {
+      console.error('Realtime listener error:', err);
+      if (connectionStatus) connectionStatus.textContent = 'Connection issue';
+    });
+}
+
+/* ========= SCROLL TO TOP BUTTON ========= */
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 300) {
+    scrollTopBtn.style.display = 'flex';
+  } else {
+    scrollTopBtn.style.display = 'none';
+  }
+});
+
+/* ========= INIT ========= */
+function init() {
+  renderSilverPrizeGrid();
+  renderGoldPrizeGrid();
+  setActiveTab('all');
+  deactivateSilverSpin();
+  deactivateGoldSpin();
+  loadFirebaseState();
+  setupRealtimeListener();
+}
 init();
 </script>
 </body>
-
 </html>
