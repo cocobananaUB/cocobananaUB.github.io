@@ -3,2404 +3,1800 @@
 <head>
   <meta charset="UTF-8" />
   <title>Coco Banana · Premium Nightclub Experience</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- PWA manifest (optional, safe to keep even without SW) -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="manifest.json" />
 
   <style>
-    :root {
-      --bg: #000000;
-      --bg-alt: #0a0015;
-      --bg-soft: #1a0025;
-      --neon-pink: #ff2d95;
-      --neon-blue: #00f0ff;
-      --neon-purple: #b967ff;
-      --lux-gold: #ffd700;
-      --lux-gold-glow: #ffed4e;
-      --text-main: #ffffff;
-      --text-muted: #b0b0b0;
-      --danger: #ff3860;
-      --success: #00d4aa;
-      --border-soft: rgba(255,255,255,0.15);
-      --glass-bg: rgba(0, 0, 0, 0.7);
-      --glass-border: rgba(255,255,255,0.2);
-      --premium-glow: 0 0 30px rgba(255, 215, 0, 0.6);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: 
-        radial-gradient(ellipse at 20% 20%, rgba(255, 45, 149, 0.25) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.2) 0%, transparent 50%),
-        radial-gradient(ellipse at 40% 60%, rgba(185, 103, 255, 0.15) 0%, transparent 50%),
-        linear-gradient(135deg, #000000 0%, #0a0015 30%, #1a0025 70%, #000000 100%);
-      background-attachment: fixed;
-      color: var(--text-main);
-      min-height: 100vh;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        radial-gradient(circle at 20% 30%, rgba(255, 45, 149, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(0, 240, 255, 0.08) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .app {
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 20px 16px 30px;
-      position: relative;
-    }
-
-    /* Premium Logo with Animation */
-    .logo-wrap { 
-      text-align: center; 
-      margin-bottom: 20px;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .logo-text-main {
-      font-size: 52px;
-      font-weight: 900;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: transparent;
-      background: linear-gradient(45deg, var(--neon-pink), var(--neon-blue), var(--lux-gold));
-      background-clip: text;
-      -webkit-background-clip: text;
-      text-shadow: 0 0 30px rgba(255, 45, 149, 0.5);
-      margin-bottom: -8px;
-      position: relative;
-      animation: logoGlow 3s ease-in-out infinite alternate;
-    }
-
-    .logo-text-sub {
-      font-family: "Playfair Display", serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--lux-gold);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      text-shadow: 
-        0 0 20px var(--lux-gold-glow),
-        0 0 40px rgba(255, 215, 0, 0.4);
-      position: relative;
-    }
-
-    .logo-text-sub::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--lux-gold), transparent);
-    }
-
-    @keyframes logoGlow {
-      0% { text-shadow: 0 0 20px rgba(255, 45, 149, 0.5), 0 0 40px rgba(0, 240, 255, 0.3); }
-      100% { text-shadow: 0 0 30px rgba(255, 45, 149, 0.8), 0 0 60px rgba(0, 240, 255, 0.5); }
-    }
-
-    .tagline { 
-      text-align: center; 
-      font-size: 13px; 
-      color: var(--text-muted); 
-      margin-bottom: 20px; 
-      line-height: 1.5;
-      letter-spacing: 0.05em;
-    }
-
-    /* Premium Flash Deal - Nightclub Style */
-    .flash-bar {
-      border-radius: 20px;
-      padding: 18px 20px;
-      margin-bottom: 24px;
-      background: linear-gradient(135deg, rgba(255, 45, 149, 0.15), rgba(0, 0, 0, 0.9));
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 45, 149, 0.3);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      cursor: pointer;
-      box-shadow: 0 8px 32px rgba(255, 45, 149, 0.2);
-    }
-
-    .flash-bar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      transition: left 0.6s ease;
-    }
-
-    .flash-bar:hover::before {
-      left: 100%;
-    }
-
-    .flash-bar:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(255, 45, 149, 0.4);
-      border-color: rgba(255, 45, 149, 0.6);
-    }
-
-    .flash-bar.inactive { 
-      opacity: 0.8;
-      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0, 0, 0, 0.9));
-      border-color: rgba(255,255,255,0.1);
-    }
-
-    .flash-bar.active { 
-      animation: premiumPulse 2s ease-in-out infinite;
-      border-color: rgba(255, 45, 149, 0.8);
-      box-shadow: 0 0 30px rgba(255, 45, 149, 0.4), 0 8px 32px rgba(255, 45, 149, 0.3);
-    }
-
-    .flash-bar.ending-soon {
-      animation: urgentPulse 1s ease-in-out infinite;
-      border-color: rgba(255, 56, 96, 0.8);
-      box-shadow: 0 0 40px rgba(255, 56, 96, 0.6), 0 8px 32px rgba(255, 56, 96, 0.4);
-    }
-
-    @keyframes premiumPulse {
-      0%, 100% { 
-        box-shadow: 0 0 20px rgba(255, 45, 149, 0.4), 0 8px 32px rgba(255, 45, 149, 0.3);
-      }
-      50% { 
-        box-shadow: 0 0 40px rgba(255, 45, 149, 0.8), 0 12px 48px rgba(255, 45, 149, 0.6);
-      }
-    }
-
-    @keyframes urgentPulse {
-      0%, 100% { 
-        box-shadow: 0 0 25px rgba(255, 56, 96, 0.6), 0 8px 32px rgba(255, 56, 96, 0.4);
-      }
-      50% { 
-        box-shadow: 0 0 50px rgba(255, 56, 96, 1), 0 12px 48px rgba(255, 56, 96, 0.8);
-      }
-    }
-
-    .flash-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      gap: 10px;
-    }
-
-    .flash-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--neon-pink);
-    }
-
-    .flash-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--neon-pink);
-      box-shadow: 0 0 20px var(--neon-pink);
-      animation: dotPulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes dotPulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.7; }
-    }
-
-    .flash-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      background: linear-gradient(135deg, rgba(255, 45, 149, 0.2), rgba(0, 240, 255, 0.2));
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: var(--neon-blue);
-      backdrop-filter: blur(10px);
-    }
-
-    .flash-body {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 15px;
-      font-size: 14px;
-    }
-
-    .flash-item-name { 
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--text-main);
-    }
-
-    .flash-item-meta { 
-      font-size: 13px; 
-      color: var(--neon-blue);
-      margin-top: 4px;
-    }
-
-    .flash-timer { 
-      text-align: right;
-      min-width: 80px;
-    }
-
-    .flash-timer-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-
-    .flash-timer-value {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--lux-gold);
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-      font-feature-settings: "tnum";
-    }
-
-    .flash-meter {
-      margin-top: 15px;
-      width: 100%;
-      height: 4px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .flash-meter-fill {
-      width: 100%;
-      height: 100%;
-      border-radius: 10px;
-      background: linear-gradient(90deg, var(--neon-pink), var(--lux-gold));
-      transform-origin: left center;
-      transform: scaleX(1);
-      transition: transform 0.5s linear;
-      position: relative;
-    }
-
-    .flash-meter-fill::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      animation: shimmer 2s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-
-    /* Premium Tabs */
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 20px 0;
-      justify-content: center;
-    }
-
-    .tab-btn {
-      border-radius: 25px;
-      padding: 12px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(0, 0, 0, 0.6);
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      backdrop-filter: blur(10px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .tab-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      transition: left 0.5s;
-    }
-
-    .tab-btn:hover::before {
-      left: 100%;
-    }
-
-    .tab-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-main);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-      color: #000;
-      border-color: transparent;
-      box-shadow: 0 5px 20px rgba(255, 45, 149, 0.4);
-      font-weight: 700;
-    }
-
-    /* Premium Cards */
-    .section { 
-      margin-bottom: 25px;
-      animation: fadeInUp 0.6s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding: 0 5px;
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      color: var(--text-main);
-      position: relative;
-    }
-
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 40px;
-      height: 2px;
-      background: linear-gradient(90deg, var(--neon-pink), transparent);
-    }
-
-    .section-tag { 
-      font-size: 12px; 
-      color: var(--neon-blue);
-      letter-spacing: 0.1em;
-    }
-
-    .card-list { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 15px;
-    }
-
-    .card {
-      padding: 20px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.8));
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      transition: left 0.6s ease;
-    }
-
-    .card:hover::before {
-      left: 100%;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-    }
-
-    .card-main {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .card-name { 
-      font-size: 17px; 
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .card-price {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--lux-gold);
-      white-space: nowrap;
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-    }
-
-    .card-price .strike { 
-      text-decoration: line-through; 
-      opacity: 0.5; 
-      margin-right: 8px;
-      color: var(--text-muted);
-    }
-
-    .card-price .discount { 
-      color: var(--neon-pink); 
-      font-weight: 800;
-      text-shadow: 0 0 10px rgba(255, 45, 149, 0.5);
-    }
-
-    .popular-badge {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-      color: #000;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 900;
-      transform: rotate(5deg);
-      box-shadow: 0 4px 15px rgba(255, 45, 149, 0.4);
-      letter-spacing: 0.1em;
-      z-index: 2;
-    }
-
-    /* Premium Spin Sections */
-    .spin-wrap { 
-      margin-top: 10px;
-      animation: fadeInUp 0.8s ease-out;
-    }
-
-    .spin-panel {
-      padding: 25px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(255, 45, 149, 0.1));
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    .spin-panel::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--neon-pink), var(--neon-blue), transparent);
-    }
-
-    .gold-spin-panel {
-      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(255, 215, 0, 0.15));
-      border: 1px solid rgba(255, 215, 0, 0.4);
-      box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
-    }
-
-    .gold-spin-panel::before {
-      background: linear-gradient(90deg, transparent, var(--lux-gold), var(--neon-pink), transparent);
-    }
-
-    .spin-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
-      gap: 15px;
-    }
-
-    .spin-title {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-pink));
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-    }
-
-    .spin-title.gold {
-      background: linear-gradient(135deg, var(--lux-gold), #ff6b00);
-      background-clip: text;
-      -webkit-background-clip: text;
-      text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-    }
-
-    .spin-sub {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 8px;
-      line-height: 1.5;
-      max-width: 300px;
-    }
-
-    .wheel-container {
-      position: relative;
-      width: 220px;
-      height: 220px;
-      margin: 20px auto;
-    }
-
-    .spin-wheel, .golden-wheel {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      position: relative;
-      overflow: hidden;
-      transition: transform 4s cubic-bezier(0.2, 0.8, 0.3, 1);
-      box-shadow: 
-        0 0 0 4px rgba(255, 255, 255, 0.1),
-        0 0 30px rgba(0, 0, 0, 0.8);
-    }
-
-    .spin-wheel {
-      background: conic-gradient(
+    :root{
+      --bg:#000000;
+      --bg-alt:#0a0015;
+      --bg-soft:#1a0025;
+
+      --neon-pink:#ff2d95;
+      --neon-blue:#00f0ff;
+      --neon-purple:#b967ff;
+
+      --lux-gold:#ffd700;
+      --lux-gold-glow:#ffed4e;
+
+      --text-main:#ffffff;
+      --text-muted:#b0b0b0;
+      --text-dim:rgba(255,255,255,0.55);
+
+      --danger:#ff3860;
+      --success:#00d4aa;
+
+      --border-soft:rgba(255,255,255,0.15);
+
+      --glass-bg:rgba(0,0,0,0.65);
+      --glass-border:rgba(255,255,255,0.18);
+
+      --premium-glow:0 0 30px rgba(255,215,0,0.6);
+
+      --radius-1:14px;
+      --radius-2:18px;
+      --radius-3:22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+    body{
+      margin:0;
+      font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255,45,149,0.22) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 80%, rgba(0,240,255,0.16) 0%, transparent 55%),
+        radial-gradient(ellipse at 40% 60%, rgba(185,103,255,0.14) 0%, transparent 60%),
+        linear-gradient(135deg,#000000 0%,#0a0015 30%,#1a0025 70%,#000000 100%);
+      background-attachment:fixed;
+      color:var(--text-main);
+      min-height:100vh;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      overflow-x:hidden;
+      position:relative;
+    }
+
+    body::before{
+      content:'';
+      position:fixed; inset:0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,45,149,0.10) 0%, transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(0,240,255,0.08) 0%, transparent 55%),
+        url('data:image/svg+xml,<svg width="22" height="22" xmlns="http://www.w3.org/2000/svg"><rect width="22" height="22" fill="none"/><path d="M0 0L22 22M22 0L0 22" stroke="rgba(255,255,255,0.02)" stroke-width="0.6"/></svg>');
+      pointer-events:none;
+      z-index:-2;
+    }
+
+    body::after{
+      content:'';
+      position:fixed; inset:0;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(255,45,149,0.10) 0%, transparent 55%),
+        radial-gradient(circle at 75% 75%, rgba(0,240,255,0.10) 0%, transparent 55%);
+      animation:particleFloat 20s ease-in-out infinite alternate;
+      pointer-events:none;
+      z-index:-1;
+    }
+
+    @keyframes particleFloat{
+      0%,100%{transform:translate(0,0)}
+      25%{transform:translate(-10px,10px)}
+      50%{transform:translate(10px,-10px)}
+      75%{transform:translate(-10px,-10px)}
+    }
+
+    .container{
+      max-width:960px;
+      margin:0 auto;
+      padding:18px 16px 110px;
+    }
+
+    .logo-wrap{
+      text-align:center;
+      margin-bottom:8px;
+      position:relative;
+      cursor:pointer;
+      padding:18px 0;
+      user-select:none;
+    }
+
+    .logo-text-main{
+      font-size:3.2rem;
+      font-weight:900;
+      letter-spacing:0.28em;
+      text-transform:uppercase;
+      color:transparent;
+      background:linear-gradient(45deg,#7a00ff,#ff2d95,#ff3d3d);
+      -webkit-background-clip:text;
+      background-clip:text;
+      text-shadow:
+        0 0 30px rgba(185,103,255,0.55),
+        0 0 60px rgba(255,45,149,0.25);
+      margin:0;
+      display:inline-block;
+      animation:logoGlow 3s ease-in-out infinite alternate;
+      position:relative;
+    }
+
+    .logo-text-main::before{
+      content:'';
+      position:absolute;
+      inset:-10px;
+      background:inherit;
+      filter:blur(20px);
+      opacity:0.35;
+      z-index:-1;
+    }
+
+    @keyframes logoGlow{
+      0%{filter:saturate(1);transform:translateY(0)}
+      100%{filter:saturate(1.1);transform:translateY(-1px)}
+    }
+
+    .logo-text-sub{
+      font-family:"Playfair Display",serif;
+      font-size:1.4rem;
+      font-weight:700;
+      color:var(--lux-gold);
+      letter-spacing:0.18em;
+      text-transform:uppercase;
+      text-shadow:
+        0 0 18px var(--lux-gold-glow),
+        0 0 40px rgba(255,215,0,0.28);
+      display:inline-block;
+      margin-top:-10px;
+      position:relative;
+    }
+
+    .logo-text-sub::after{
+      content:'';
+      position:absolute;
+      bottom:-10px;
+      left:50%;
+      transform:translateX(-50%);
+      width:120px;
+      height:2px;
+      background:linear-gradient(90deg,transparent,var(--lux-gold),transparent);
+      box-shadow:0 0 10px var(--lux-gold);
+      opacity:.85;
+    }
+
+    .tagline{
+      text-align:center;
+      margin:16px auto 10px;
+      color:rgba(255,255,255,0.78);
+      font-size:0.95rem;
+      line-height:1.35;
+    }
+
+    .premium-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 16px;
+      border-radius:20px;
+      background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,45,149,0.10));
+      border:1px solid rgba(255,215,0,0.30);
+      margin:8px auto 18px;
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      animation:badgeGlow 2s ease-in-out infinite;
+      justify-content:center;
+    }
+
+    .badge-icon{filter:drop-shadow(0 0 10px rgba(255,215,0,.25))}
+    .badge-text{font-weight:800;letter-spacing:.12em;font-size:12px;color:rgba(255,255,255,.92)}
+
+    @keyframes badgeGlow{
+      0%,100%{box-shadow:0 0 20px rgba(255,215,0,0.10)}
+      50%{box-shadow:0 0 30px rgba(255,215,0,0.30)}
+    }
+
+    .top-tools{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin:18px 0;
+      padding:14px 16px;
+      border-radius:20px;
+      background:rgba(0,0,0,0.55);
+      border:1px solid rgba(255,255,255,0.12);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .search-wrap{flex:1;position:relative}
+    .search-wrap::before{
+      content:'🔍';
+      position:absolute;
+      left:16px;
+      top:50%;
+      transform:translateY(-50%);
+      opacity:0.6;
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .search-input{
+      width:100%;
+      padding:14px 42px 14px 45px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.2);
+      background:rgba(0,0,0,0.7);
+      color:var(--text-main);
+      font-size:15px;
+      outline:none;
+      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+    }
+
+    .search-input:focus{
+      border-color:var(--neon-blue);
+      box-shadow:0 0 0 3px rgba(0,240,255,0.10),0 0 30px rgba(0,240,255,0.22);
+      transform:translateY(-1px);
+    }
+
+    .search-input::placeholder{color:rgba(255,255,255,0.40)}
+
+    .search-clear{
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      background:none;
+      border:none;
+      color:rgba(255,255,255,0.5);
+      font-size:22px;
+      cursor:pointer;
+      padding:6px;
+      display:none;
+      border-radius:10px;
+    }
+
+    .search-clear:hover{color:rgba(255,255,255,0.9)}
+
+    .lang-toggle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding-left:6px;
+      user-select:none;
+    }
+
+    .lang-label{
+      font-size:12px;
+      letter-spacing:.12em;
+      font-weight:800;
+      color:var(--text-muted);
+    }
+
+    .switch{
+      width:54px;
+      height:30px;
+      background:rgba(255,255,255,0.10);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:999px;
+      position:relative;
+      cursor:pointer;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.25);
+      transition:all .25s ease;
+    }
+
+    .switch.on{
+      background:linear-gradient(135deg,rgba(0,240,255,0.25),rgba(255,45,149,0.22));
+      border-color:rgba(0,240,255,0.35);
+      box-shadow:0 0 20px rgba(0,240,255,0.12);
+    }
+
+    .switch-knob{
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      position:absolute;
+      top:50%;
+      left:3px;
+      transform:translateY(-50%);
+      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.85), rgba(255,255,255,0.35));
+      border:1px solid rgba(0,0,0,0.45);
+      transition:all .25s ease;
+      box-shadow:0 8px 20px rgba(0,0,0,0.35);
+    }
+
+    .switch.on .switch-knob{left:27px}
+
+    .panel{
+      padding:16px;
+      border-radius:20px;
+      background:rgba(0,0,0,0.55);
+      border:1px solid rgba(255,255,255,0.12);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      box-shadow:0 10px 35px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.06);
+      margin:14px 0;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .panel-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      font-size:12px;
+      color:rgba(255,255,255,0.9);
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--neon-blue);
+      box-shadow:0 0 18px rgba(0,240,255,0.7);
+    }
+
+    .pill{
+      padding:7px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(0,0,0,0.45);
+      color:rgba(255,255,255,0.78);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.06em;
+      white-space:nowrap;
+    }
+
+    .picker-grid{
+      display:grid;
+      gap:10px;
+    }
+
+    .select,.input{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(0,0,0,0.65);
+      color:rgba(255,255,255,0.92);
+      padding:14px 14px;
+      outline:none;
+      font-size:14px;
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      transition:all .2s ease;
+    }
+
+    .select:focus,.input:focus{
+      border-color:rgba(255,45,149,0.55);
+      box-shadow:0 0 0 3px rgba(255,45,149,0.10), 0 0 24px rgba(255,45,149,0.18);
+    }
+
+    .tabs-container{margin:16px 0 22px}
+    .tabs{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      padding:10px 0 15px;
+      margin:0 -16px;
+      padding-left:16px;
+      padding-right:16px;
+      scrollbar-width:none;
+    }
+    .tabs::-webkit-scrollbar{display:none}
+
+    .tab-btn{
+      flex-shrink:0;
+      border-radius:999px;
+      padding:12px 18px;
+      font-size:13px;
+      font-weight:750;
+      border:1px solid rgba(255,255,255,0.20);
+      background:rgba(0,0,0,0.45);
+      color:var(--text-dim);
+      cursor:pointer;
+      transition:all 0.28s cubic-bezier(0.4,0,0.2,1);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      position:relative;
+      overflow:hidden;
+      white-space:nowrap;
+    }
+
+    .tab-btn:hover{
+      color:rgba(255,255,255,0.95);
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,0.30);
+      box-shadow:0 10px 28px rgba(0,0,0,0.35);
+    }
+
+    .tab-btn.active{
+      background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));
+      color:#000;
+      border-color:transparent;
+      font-weight:900;
+      transform:translateY(-2px);
+      box-shadow:0 0 20px rgba(255,45,149,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    }
+
+    .section{margin:18px 0 26px; animation:fadeInUp 0.55s cubic-bezier(0.4,0,0.2,1) both}
+    .section-title{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:12px;
+      margin:0 0 12px;
+      padding:0 4px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,0.86);
+    }
+    .section-title span{
+      font-size:12px;
+      color:rgba(255,255,255,0.55);
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    @keyframes fadeInUp{
+      from{opacity:0;transform:translateY(26px) scale(0.98)}
+      to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    .grid{display:grid;gap:12px}
+
+    .card{
+      padding:20px;
+      border-radius:20px;
+      background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.80));
+      backdrop-filter:blur(22px);
+      -webkit-backdrop-filter:blur(22px);
+      border:1px solid rgba(255,255,255,0.08);
+      transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+      position:relative;
+      overflow:hidden;
+      transform:translateY(0);
+    }
+
+    .card::after{
+      content:'';
+      position:absolute;
+      inset:-2px;
+      background:linear-gradient(45deg, var(--neon-pink), var(--neon-blue), var(--neon-purple));
+      border-radius:22px;
+      opacity:0;
+      transition:opacity 0.35s ease;
+      z-index:-1;
+    }
+
+    .card:hover{
+      transform:translateY(-5px);
+      border-color:rgba(255,255,255,0.18);
+      box-shadow:0 18px 40px rgba(0,0,0,0.55), 0 0 60px rgba(255,45,149,0.10);
+    }
+    .card:hover::after{opacity:0.22}
+
+    .card-main{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+    }
+
+    .card-left{min-width:0}
+    .card-name{
+      font-size:16px;
+      font-weight:800;
+      color:rgba(255,255,255,0.95);
+      line-height:1.25;
+      margin:0;
+    }
+    .card-meta{
+      margin-top:8px;
+      font-size:12px;
+      line-height:1.35;
+      color:rgba(255,255,255,0.62);
+    }
+    .card-compare{
+      margin-top:6px;
+      font-size:12px;
+      line-height:1.35;
+      color:rgba(0,240,255,0.90);
+      font-weight:800;
+    }
+    .card-upsell{
+      margin-top:6px;
+      font-size:12px;
+      line-height:1.35;
+      color:rgba(255,215,0,0.90);
+      font-weight:800;
+    }
+
+    .card-price{
+      font-size:18px;
+      font-weight:900;
+      color:var(--lux-gold);
+      white-space:nowrap;
+      text-shadow:0 0 10px rgba(255,215,0,0.22), 0 0 18px rgba(255,215,0,0.08);
+      flex-shrink:0;
+    }
+
+    .btn{
+      width:100%;
+      padding:16px 18px;
+      border-radius:999px;
+      border:none;
+      cursor:pointer;
+      font-size:15px;
+      font-weight:900;
+      background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));
+      color:#000;
+      box-shadow:0 10px 30px rgba(255,45,149,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+      transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+    }
+    .btn:hover{transform:translateY(-2px); box-shadow:0 14px 40px rgba(255,45,149,0.52), inset 0 1px 0 rgba(255,255,255,0.30)}
+    .btn:active{transform:translateY(0)}
+    .btn:disabled{opacity:.55; cursor:not-allowed; filter:saturate(.9)}
+    .btn.secondary{
+      background:linear-gradient(135deg, rgba(0,240,255,0.35), rgba(255,215,0,0.30));
+      color:rgba(0,0,0,0.95);
+      box-shadow:0 10px 30px rgba(0,240,255,0.18), inset 0 1px 0 rgba(255,255,255,0.25);
+    }
+
+    .spin-wrap{
+      padding:18px;
+      border-radius:22px;
+      background:rgba(0,0,0,0.60);
+      border:1px solid rgba(255,255,255,0.12);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 12px 40px rgba(0,0,0,0.35);
+      margin:18px 0;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .spin-wrap::before{
+      content:'';
+      position:absolute; inset:-60px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,45,149,0.14) 0%, transparent 55%),
+        radial-gradient(circle at 75% 70%, rgba(0,240,255,0.12) 0%, transparent 55%),
+        radial-gradient(circle at 55% 40%, rgba(255,215,0,0.08) 0%, transparent 55%);
+      filter:blur(18px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .spin-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+      position:relative;
+      z-index:2;
+    }
+
+    .spin-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:950;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-size:13px;
+    }
+
+    .spin-sub{
+      color:rgba(255,255,255,0.68);
+      font-size:12.5px;
+      line-height:1.35;
+      margin:10px 0 0;
+      position:relative;
+      z-index:2;
+    }
+
+    .wheel-container{
+      position:relative;
+      width:250px;
+      height:250px;
+      margin:18px auto 10px;
+      z-index:2;
+    }
+
+    .spin-wheel,.gold-wheel{
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      position:relative;
+      overflow:hidden;
+      transition:transform 4.2s cubic-bezier(0.12,0.92,0.18,1);
+      box-shadow:
+        0 0 0 4px rgba(255,255,255,0.10),
+        0 0 40px rgba(0,0,0,0.80),
+        inset 0 0 40px rgba(0,0,0,0.90);
+      will-change:transform;
+    }
+
+    .spin-wheel{
+      background:conic-gradient(
         from 0deg,
-        var(--neon-pink) 0deg 60deg,
-        var(--neon-blue) 60deg 120deg,
-        var(--neon-purple) 120deg 180deg,
-        var(--lux-gold) 180deg 240deg,
-        var(--success) 240deg 300deg,
-        var(--danger) 300deg 360deg
+        rgba(0,240,255,0.95) 0deg 40deg,
+        rgba(255,45,149,0.95) 40deg 90deg,
+        rgba(185,103,255,0.95) 90deg 150deg,
+        rgba(255,215,0,0.95) 150deg 210deg,
+        rgba(0,212,170,0.95) 210deg 280deg,
+        rgba(255,56,96,0.95) 280deg 360deg
       );
     }
 
-    .golden-wheel {
-      background: conic-gradient(
+    .gold-wheel{
+      background:conic-gradient(
         from 0deg,
-        #ffd700 0deg 40deg,
-        #ff6b00 40deg 80deg,
-        #ff4444 80deg 120deg,
-        #ffd700 120deg 160deg,
-        #ff6b00 160deg 200deg,
-        #ff4444 200deg 240deg,
-        #ffd700 240deg 280deg,
-        #ff6b00 280deg 320deg,
-        #ff4444 320deg 360deg
+        rgba(255,215,0,0.98) 0deg 35deg,
+        rgba(255,107,0,0.98) 35deg 85deg,
+        rgba(255,68,68,0.98) 85deg 125deg,
+        rgba(255,215,0,0.98) 125deg 175deg,
+        rgba(255,107,0,0.98) 175deg 225deg,
+        rgba(255,68,68,0.98) 225deg 265deg,
+        rgba(255,215,0,0.98) 265deg 315deg,
+        rgba(255,107,0,0.98) 315deg 360deg
       );
-    }
-
-    .wheel-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      background: rgba(0, 0, 0, 0.9);
-      border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.8);
-      z-index: 10;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    }
-
-    .wheel-pointer {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-top: 35px solid var(--neon-pink);
-      z-index: 20;
-      filter: drop-shadow(0 0 10px rgba(255, 45, 149, 0.8));
-    }
-
-    .gold-spin-panel .wheel-pointer {
-      border-top-color: var(--lux-gold);
-      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
-    }
-
-    .spin-wheel.spinning, .golden-wheel.spinning {
-      animation: premiumSpin 4s cubic-bezier(0.2, 0.8, 0.3, 1);
-    }
-
-    @keyframes premiumSpin {
-      0% { 
-        transform: rotate(0deg);
-        filter: hue-rotate(0deg);
-      }
-      100% { 
-        transform: rotate(1440deg);
-        filter: hue-rotate(360deg);
-      }
-    }
-
-    .spin-btn {
-      margin-top: 20px;
-      width: 100%;
-      padding: 18px 24px;
-      border-radius: 50px;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-      color: #000;
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
-      box-shadow: 
-        0 5px 20px rgba(255, 45, 149, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .spin-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-
-    .spin-btn:hover::before {
-      left: 100%;
-    }
-
-    .spin-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 
-        0 8px 30px rgba(255, 45, 149, 0.6),
-        0 0 0 1px rgba(255, 255, 255, 0.2);
-    }
-
-    .spin-btn.gold {
-      background: linear-gradient(135deg, var(--lux-gold), #ff6b00);
-      box-shadow: 
-        0 5px 20px rgba(255, 215, 0, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-    }
-
-    .spin-btn.gold:hover {
-      box-shadow: 
-        0 8px 30px rgba(255, 215, 0, 0.6),
-        0 0 0 1px rgba(255, 255, 255, 0.2);
-    }
-
-    .spin-btn:active {
-      transform: translateY(-1px);
-    }
-
-    .spin-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .spin-btn.spinning {
-      animation: btnPulse 0.8s ease-in-out infinite;
-    }
-
-    @keyframes btnPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-
-    .spin-result {
-      margin-top: 20px;
-      min-height: 50px;
-      font-size: 16px;
-      text-align: center;
-      padding: 15px;
-      border-radius: 12px;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-    }
-
-    .spin-result-main {
-      font-weight: 700;
-      font-size: 18px;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .spin-result-main.big {
-      font-size: 24px;
-      color: var(--lux-gold);
-      text-shadow: 
-        0 0 20px var(--lux-gold-glow),
-        0 0 40px rgba(255, 215, 0, 0.5);
-      animation: resultGlow 2s ease-in-out infinite;
-    }
-
-    @keyframes resultGlow {
-      0%, 100% { text-shadow: 0 0 20px var(--lux-gold-glow), 0 0 40px rgba(255, 215, 0, 0.5); }
-      50% { text-shadow: 0 0 30px var(--lux-gold-glow), 0 0 60px rgba(255, 215, 0, 0.8); }
-    }
-
-    .spin-result-main.mid { 
-      color: var(--neon-blue);
-      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-    }
-
-    .spin-result-main.low { 
-      color: var(--text-muted);
-    }
-
-    .spin-result-note {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-
-    /* Prize Grids */
-    .silver-prizes, .gold-prizes-title {
-      margin-top: 25px;
-    }
-
-    .silver-prizes-title, .gold-prizes-title {
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      margin-bottom: 15px;
-      color: var(--neon-blue);
-      text-align: center;
-      font-weight: 700;
-    }
-
-    .gold-prizes-title {
-      color: var(--lux-gold);
-    }
-
-    .silver-prizes-grid, .premium-prizes-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .prize-item {
-      padding: 16px 20px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
-      position: relative;
-      backdrop-filter: blur(10px);
-    }
-
-    .prize-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateX(5px);
-    }
-
-    .prize-item.big-prize {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 45, 149, 0.1));
-      border: 2px solid rgba(255, 215, 0, 0.6);
-      box-shadow: 
-        0 5px 20px rgba(255, 215, 0, 0.3),
-        inset 0 0 20px rgba(255, 215, 0, 0.1);
-      animation: luxuryPulse 3s ease-in-out infinite;
-    }
-
-    .prize-item.big-prize::before {
-      content: '✨';
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      animation: sparkle 2s ease-in-out infinite;
-    }
-
-    @keyframes sparkle {
-      0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
-      50% { opacity: 0.7; transform: translateY(-50%) scale(1.1); }
-    }
-
-    .prize-text {
-      font-weight: 700;
-      margin-left: 35px;
-      font-size: 14px;
-    }
-
-    .prize-item.big-prize .prize-text {
-      color: var(--lux-gold);
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    }
-
-    .prize-value {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      margin-left: 35px;
-    }
-
-    .prize-item.big-prize .prize-value {
-      color: #ffa500;
-      font-weight: 600;
-    }
-
-    @keyframes luxuryPulse {
-      0%, 100% { 
-        box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1);
-        transform: scale(1);
-      }
-      50% { 
-        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6), inset 0 0 30px rgba(255, 215, 0, 0.2);
-        transform: scale(1.02);
-      }
-    }
-
-    /* Spin Code Input */
-    .spin-code-panel {
-      margin-top: 20px;
-      padding: 20px;
-      border-radius: 16px;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(15px);
-      border: 1px dashed rgba(255, 255, 255, 0.2);
-      text-align: center;
-    }
-
-    .spin-code-input {
-      display: flex;
-      gap: 12px;
-      margin-top: 15px;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .spin-code-input input {
-      width: 100px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      background: rgba(0, 0, 0, 0.8);
-      color: var(--text-main);
-      font-size: 18px;
-      text-align: center;
-      letter-spacing: 4px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .spin-code-input input:focus {
-      outline: none;
-      border-color: var(--neon-blue);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-    }
-
-    .spin-code-btn {
-      padding: 12px 24px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-      color: #000;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      transition: all 0.3s ease;
-      letter-spacing: 0.1em;
-    }
-
-    .spin-code-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
-    }
-
-    .spin-code-msg {
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--text-muted);
-      min-height: 20px;
-    }
-
-    .spin-code-error {
-      color: var(--danger) !important;
-      text-shadow: 0 0 10px rgba(255, 56, 96, 0.3);
-    }
-
-    .spin-code-success {
-      color: var(--success) !important;
-      text-shadow: 0 0 10px rgba(0, 212, 170, 0.3);
-    }
-
-    .loading-spinner {
-      width: 24px;
-      height: 24px;
-      border: 3px solid transparent;
-      border-top: 3px solid var(--neon-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Hidden Admin System */
-    .admin-bar {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.3);
-      letter-spacing: 0.1em;
-    }
-
-    .admin-panel {
-      margin-top: 15px;
-      padding: 20px;
-      border-radius: 16px;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 13px;
-      display: none;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-    }
-
-    .admin-panel > div:first-child {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: var(--neon-blue);
-      text-align: center;
-    }
-
-    .admin-badge {
-      font-size: 12px;
-      color: var(--success);
-      margin-top: 5px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    .admin-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .admin-row:last-child {
-      border-bottom: none;
-    }
-
-    .switch {
-      position: relative;
-      width: 50px;
-      height: 26px;
-      border-radius: 25px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: all 0.3s ease;
-    }
-
-    .switch:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .switch-knob {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--text-main);
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    }
-
-    .switch.on {
-      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-      border-color: transparent;
-    }
-
-    .switch.on .switch-knob {
-      transform: translateX(24px);
-      background: #000;
-    }
-
-    .admin-input, .admin-select {
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(0, 0, 0, 0.6);
-      color: var(--text-main);
-      font-size: 13px;
-      min-width: 80px;
-    }
-
-    .admin-select {
-      min-width: 160px;
-    }
-
-    .admin-login {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .admin-login input {
-      flex: 1;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(0, 0, 0, 0.6);
-      color: var(--text-main);
-      font-size: 14px;
-      text-align: center;
-      letter-spacing: 2px;
-    }
-
-    .admin-login button {
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-      color: #000;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-      transition: all 0.3s ease;
-    }
-
-    .admin-login button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
-    }
-
-    #adminFlashSummary {
-      margin-top: 15px;
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: center;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-    }
-
-    .preset-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .preset-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .preset-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-main);
-      transform: translateY(-2px);
-    }
-
-    .preset-btn.weekday:hover { border-color: var(--neon-blue); }
-    .preset-btn.weekend:hover { border-color: var(--neon-pink); }
-    .preset-btn.party:hover { border-color: var(--lux-gold); }
-
-    .footer {
-      margin-top: 50px;
-      font-size: 11px;
-      text-align: center;
-      color: var(--text-muted);
-      line-height: 1.6;
-      letter-spacing: 0.05em;
-      padding: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* Quick Navigation */
-    .quick-nav {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 1000;
-    }
-
-    .quick-nav button {
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-      border: none;
-      color: #000;
-      font-size: 22px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      box-shadow: 0 5px 20px rgba(255, 45, 149, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .quick-nav button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-
-    .quick-nav button:hover::before {
-      left: 100%;
-    }
-
-    .quick-nav button:hover {
-      transform: scale(1.15) translateY(-3px);
-      box-shadow: 0 8px 30px rgba(255, 45, 149, 0.6);
-    }
-
-    .quick-nav button:nth-child(2) {
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-      box-shadow: 0 5px 20px rgba(0, 240, 255, 0.4);
-    }
-
-    .quick-nav button:nth-child(3) {
-      background: linear-gradient(135deg, var(--lux-gold), #ff6b00);
-      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
-    }
-
-    .quick-nav button:nth-child(4) {
-      background: linear-gradient(135deg, var(--success), var(--neon-blue));
-      box-shadow: 0 5px 20px rgba(0, 212, 170, 0.4);
-    }
-
-    #scrollTopBtn {
-      background: linear-gradient(135deg, #666, #999) !important;
-      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2) !important;
-      display: none;
-    }
-
-    /* Skeleton Loading */
-    #loadingSkeleton { display: none; margin-bottom: 20px; }
-    .skeleton-card {
-      height: 70px;
-      border-radius: 16px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-      background-size: 200% 100%;
-      animation: shimmer 1.5s ease-in-out infinite;
-      margin-bottom: 12px;
-      border: 1px solid rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 480px) {
-      .app { padding: 15px 12px 25px; }
-      .logo-text-main { font-size: 42px; letter-spacing: 0.25em; }
-      .logo-text-sub { font-size: 24px; }
-      .flash-bar { padding: 15px; }
-      .wheel-container { width: 200px; height: 200px; }
-      .quick-nav { bottom: 15px; right: 15px; }
-      .quick-nav button { width: 50px; height: 50px; font-size: 20px; }
-      .tabs { gap: 8px; }
-      .tab-btn { padding: 10px 16px; font-size: 13px; }
-      .spin-panel { padding: 20px; }
-    }
-
-    @media (max-width: 380px) {
-      .logo-text-main { font-size: 36px; }
-      .logo-text-sub { font-size: 20px; }
-      .flash-body { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .flash-timer { text-align: left; }
-    }
-
-    /* Accessibility */
-    @media (prefers-reduced-motion: reduce) {
-      * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-    }
-
-    /* High contrast mode */
-    @media (prefers-contrast: high) {
-      :root {
-        --text-main: #ffffff;
-        --text-muted: #cccccc;
-        --border-soft: rgba(255,255,255,0.8);
-      }
-      .card { border: 2px solid var(--border-soft); }
-      .spin-btn { border: 2px solid white; }
+      box-shadow:
+        0 0 0 4px rgba(255,215,0,0.22),
+        0 0 45px rgba(255,215,0,0.10),
+        inset 0 0 45px rgba(0,0,0,0.90);
+    }
+
+    .wheel-center{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      width:58px;
+      height:58px;
+      background:radial-gradient(circle at 30% 30%, rgba(0,0,0,0.92), #000);
+      border-radius:50%;
+      border:3px solid rgba(255,255,255,0.80);
+      z-index:10;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      color:var(--lux-gold);
+      box-shadow:0 0 20px rgba(0,0,0,0.8), inset 0 0 18px rgba(255,255,255,0.10);
+      user-select:none;
+    }
+
+    .wheel-pointer{
+      position:absolute;
+      top:-22px;
+      left:50%;
+      transform:translateX(-50%);
+      width:0;
+      height:0;
+      border-left:24px solid transparent;
+      border-right:24px solid transparent;
+      border-top:36px solid var(--neon-pink);
+      z-index:20;
+      filter:drop-shadow(0 0 15px rgba(255,45,149,0.8));
+      animation:pointerPulse 2s ease-in-out infinite;
+    }
+
+    .wheel-pointer.gold{
+      border-top-color:var(--lux-gold);
+      filter:drop-shadow(0 0 18px rgba(255,215,0,0.85));
+    }
+
+    @keyframes pointerPulse{
+      0%,100%{transform:translateX(-50%) scale(1)}
+      50%{transform:translateX(-50%) scale(1.06)}
+    }
+
+    .spin-actions{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+      position:relative;
+      z-index:2;
+    }
+
+    .spin-note{
+      color:rgba(255,255,255,0.70);
+      font-size:13px;
+      line-height:1.35;
+      margin-top:10px;
+      text-align:center;
+      position:relative;
+      z-index:2;
+    }
+
+    .result{
+      margin-top:12px;
+      padding:14px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(0,0,0,0.55);
+      text-align:center;
+      position:relative;
+      z-index:2;
+      overflow:hidden;
+    }
+    .result .main{font-weight:950; letter-spacing:.06em}
+    .result .sub{color:rgba(255,255,255,0.70); margin-top:6px; font-size:13px}
+
+    .result.big{
+      border-color:rgba(255,215,0,0.32);
+      box-shadow:0 0 0 1px rgba(255,215,0,0.16), 0 0 26px rgba(255,215,0,0.16);
+    }
+    .result.big::before{
+      content:'';
+      position:absolute; inset:-2px;
+      background:linear-gradient(120deg, rgba(255,215,0,0.16), rgba(255,45,149,0.12), rgba(0,240,255,0.10));
+      filter:blur(10px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .prize-legend{
+      margin-top:12px;
+      display:grid;
+      gap:10px;
+      position:relative;
+      z-index:2;
+    }
+
+    .legend-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(0,0,0,0.45);
+      font-size:12px;
+      font-weight:850;
+      letter-spacing:.02em;
+      color:rgba(255,255,255,0.84);
+      white-space:nowrap;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .chip.small{border-color:rgba(255,255,255,0.14); color:rgba(255,255,255,0.78)}
+    .chip.medium{
+      border-color:rgba(0,240,255,0.22);
+      box-shadow:0 0 16px rgba(0,240,255,0.10);
+      color:rgba(0,240,255,0.92);
+    }
+    .chip.big{
+      border-color:rgba(255,215,0,0.28);
+      color:#000;
+      background:linear-gradient(135deg, rgba(255,215,0,0.98), rgba(255,45,149,0.80), rgba(185,103,255,0.85));
+      box-shadow:0 0 18px rgba(255,215,0,0.14), 0 0 36px rgba(255,45,149,0.10);
+      animation:bigPrizeGlow 1.8s ease-in-out infinite;
+    }
+
+    @keyframes bigPrizeGlow{
+      0%,100%{filter:saturate(1) brightness(1)}
+      50%{filter:saturate(1.25) brightness(1.08)}
+    }
+
+    .pulse-line{
+      height:1px;
+      width:100%;
+      background:linear-gradient(90deg, transparent, rgba(255,215,0,0.65), rgba(0,240,255,0.55), transparent);
+      box-shadow:0 0 12px rgba(255,215,0,0.20);
+      opacity:.9;
+      animation:lineSweep 2.8s ease-in-out infinite;
+    }
+
+    @keyframes lineSweep{
+      0%{transform:translateX(-30%)}
+      50%{transform:translateX(30%)}
+      100%{transform:translateX(-30%)}
+    }
+
+    .quick-nav{
+      position:fixed;
+      bottom:22px;
+      right:22px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      z-index:1000;
+    }
+
+    .qbtn{
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));
+      border:none;
+      color:#000;
+      font-size:22px;
+      cursor:pointer;
+      transition:transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow:0 10px 26px rgba(255,45,149,0.35), 0 0 0 1px rgba(255,255,255,0.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+    }
+    .qbtn:hover{transform:scale(1.12) translateY(-2px); box-shadow:0 14px 36px rgba(255,45,149,0.55), 0 0 0 1px rgba(255,255,255,0.18)}
+
+    :focus-visible{
+      outline:2px solid var(--neon-blue);
+      outline-offset:4px;
+      border-radius:12px;
+      box-shadow:0 0 0 4px rgba(0,240,255,0.1);
+    }
+
+    @media (max-width:480px){
+      .logo-text-main{font-size:2.7rem; letter-spacing:0.26em}
+      .logo-text-sub{font-size:1.2rem}
+      .wheel-container{width:220px; height:220px}
+      .card{padding:18px}
+      .tab-btn{padding:11px 16px; font-size:12.5px}
+      .qbtn{width:54px; height:54px; font-size:21px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important}
+      body::after{animation:none !important}
+    }
+
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:9999;
+      overflow:hidden;
+      display:none;
+    }
+    .confetti i{
+      position:absolute;
+      top:-10vh;
+      width:10px;
+      height:18px;
+      border-radius:2px;
+      opacity:.9;
+      transform:rotate(0deg);
+      animation:confettiFall 1.6s linear forwards;
+      filter:drop-shadow(0 0 6px rgba(255,255,255,0.08));
+    }
+    @keyframes confettiFall{
+      to{transform:translate3d(var(--dx), 120vh, 0) rotate(720deg); opacity:0.95}
     }
   </style>
 </head>
+
 <body>
-<div class="app">
-  <!-- Premium Logo (hidden admin trigger via tapping/holding) -->
-  <div class="logo-wrap">
-    <div class="logo-text-main">COCO</div>
-    <div class="logo-text-sub">BANANA</div>
-  </div>
-  
-  <div class="tagline">
-    Premium Nightclub Experience · Ulaanbaatar · 21+ · Order & payment through our staff
-  </div>
+  <div class="confetti" id="confetti"></div>
 
-  <!-- Skeleton Loading -->
-  <div id="loadingSkeleton">
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-  </div>
+  <div class="container">
 
-  <!-- Premium Flash Deal -->
-  <div id="flashBar" class="flash-bar inactive">
-    <div class="flash-header">
-      <div class="flash-title">
-        <div class="flash-dot"></div>
-        <span>EXCLUSIVE DEAL</span>
-      </div>
-      <div class="flash-pill">Limited Time</div>
+    <div class="logo-wrap" id="logoWrap">
+      <div class="logo-text-main">COCO</div><br/>
+      <div class="logo-text-sub">BANANA</div>
     </div>
-    <div class="flash-body">
-      <div>
-        <div id="flashItemName" class="flash-item-name">No active deals</div>
-        <div id="flashItemMeta" class="flash-item-meta">Check back for exclusive offers</div>
-      </div>
-      <div class="flash-timer">
-        <div class="flash-timer-label">TIME LEFT</div>
-        <div id="flashTimerValue" class="flash-timer-value">--:--</div>
+
+    <div class="tagline" id="tagline"></div>
+
+    <div style="display:flex;justify-content:center;">
+      <div class="premium-badge">
+        <span class="badge-icon">✨</span>
+        <span class="badge-text" id="premiumBadgeText"></span>
       </div>
     </div>
-    <div class="flash-meter">
-      <div id="flashMeterFill" class="flash-meter-fill"></div>
-    </div>
-  </div>
 
-  <!-- Premium Tabs -->
-  <div class="tabs" id="tabs">
-    <button class="tab-btn active" data-tab="all">ALL</button>
-    <button class="tab-btn" data-tab="cocktails">COCKTAILS</button>
-    <button class="tab-btn" data-tab="beer">BEER</button>
-    <button class="tab-btn" data-tab="whiskey">WHISKEY</button>
-    <button class="tab-btn" data-tab="vodka">VODKA</button>
-    <button class="tab-btn" data-tab="gin">GIN</button>
-    <button class="tab-btn" data-tab="tequila">TEQUILA</button>
-    <button class="tab-btn" data-tab="cognac">COGNAC</button>
-    <button class="tab-btn" data-tab="wine">WINE</button>
-    <button class="tab-btn" data-tab="liquor">LIQUEUR</button>
-    <button class="tab-btn" data-tab="sets">SETS</button>
-    <button class="tab-btn" data-tab="snacks">SNACKS</button>
-    <button class="tab-btn" data-tab="softdrinks">MIXERS</button>
-  </div>
+    <div class="top-tools">
+      <div class="search-wrap">
+        <input class="search-input" id="searchInput" />
+        <button class="search-clear" id="searchClear" aria-label="Clear search">×</button>
+      </div>
 
-  <!-- Menu Container -->
-  <div id="menuContainer"></div>
-
-  <!-- SILVER SPIN -->
-  <div class="spin-wrap" id="silverSpinSection">
-    <div class="spin-panel">
-      <div class="spin-header">
-        <div>
-          <div class="spin-title">SILVER SPIN</div>
-          <div class="spin-sub">Premium prizes · Staff activation required after payment · One spin per activation</div>
+      <div class="lang-toggle" aria-label="Language toggle">
+        <span class="lang-label" id="langEN">EN</span>
+        <div class="switch on" id="langSwitch" role="switch" aria-checked="true" tabindex="0">
+          <div class="switch-knob"></div>
         </div>
-        <div class="flash-pill">Staff Code</div>
+        <span class="lang-label" id="langMN">MN</span>
+      </div>
+    </div>
+
+    <div class="panel" id="proofPanel">
+      <div class="panel-head">
+        <div class="panel-title">
+          <span class="dot"></span>
+          <span id="proofTitle"></span>
+        </div>
+        <span class="pill" id="proofPill">Coco Banana</span>
+      </div>
+      <div style="color:rgba(255,255,255,0.78);font-weight:800;line-height:1.35;" id="proofText"></div>
+    </div>
+
+    <div class="panel" id="pickerPanel">
+      <div class="panel-head">
+        <div class="panel-title" style="color:rgba(255,215,0,0.95);">
+          <span class="dot" style="background:var(--lux-gold);box-shadow:0 0 18px rgba(255,215,0,0.6);"></span>
+          <span id="pickerTitle"></span>
+        </div>
+        <span class="pill" id="pickerPill"></span>
+      </div>
+
+      <div class="picker-grid">
+        <select class="select" id="pickMood"></select>
+        <select class="select" id="pickBudget"></select>
+        <select class="select" id="pickStrength"></select>
+        <button class="btn" id="pickerGo"></button>
+        <div class="result" id="pickerResult" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="tabs-container">
+      <div class="tabs" id="tabs"></div>
+    </div>
+
+    <div id="menu"></div>
+
+    <div class="spin-wrap" id="silverSpinSection">
+      <div class="spin-head">
+        <div class="spin-title" style="color:rgba(0,240,255,0.95);">
+          <span class="dot" style="background:var(--neon-blue);box-shadow:0 0 18px rgba(0,240,255,0.7);"></span>
+          <span id="silverTitle"></span>
+        </div>
+        <span class="pill" id="silverPill"></span>
       </div>
 
       <div class="wheel-container">
-        <div id="spinWheel" class="spin-wheel"></div>
-        <div class="wheel-center"></div>
         <div class="wheel-pointer"></div>
+        <div class="spin-wheel" id="silverWheel"></div>
+        <div class="wheel-center">🎯</div>
       </div>
 
-      <div class="spin-code-panel" id="spinCodePanel">
-        <div style="font-size: 14px; color: var(--neon-blue); font-weight: 600;">STAFF ACTIVATION REQUIRED</div>
-        <div class="spin-code-input">
-          <input type="password" id="spinCodeInput" maxlength="6" placeholder="000000" />
-          <button class="spin-code-btn" id="spinCodeBtn">ACTIVATE</button>
-        </div>
-        <div class="spin-code-msg" id="spinCodeMsg">Payment required before spin activation</div>
+      <div class="spin-actions">
+        <button class="btn secondary" id="silverUnlockBtn"></button>
+        <button class="btn" id="silverSpinBtn" disabled></button>
       </div>
 
-      <button class="spin-btn" id="spinButton" disabled>ENTER CODE TO SPIN</button>
-      
-      <div class="spin-result" id="spinResult">
-        <span class="spin-result-main">Payment required for Silver Spin</span><br/>
-        <span class="spin-result-note">Contact staff to activate your spin after payment</span>
+      <div class="spin-sub" id="silverSub"></div>
+      <div class="spin-note" id="silverNote"></div>
+
+      <div class="prize-legend" aria-label="Prize highlights">
+        <div class="pulse-line"></div>
+        <div class="legend-row" id="silverLegend"></div>
       </div>
 
-      <div class="silver-prizes" id="silverPrizes">
-        <div class="silver-prizes-title">SILVER SPIN PRIZES</div>
-        <div class="silver-prizes-grid" id="silverPrizesGrid"></div>
-      </div>
+      <div class="result" id="silverResult" style="display:none;"></div>
     </div>
-  </div>
 
-  <!-- GOLDEN SPIN -->
-  <div class="spin-wrap" id="goldSpinSection">
-    <div class="spin-panel gold-spin-panel">
-      <div class="spin-header">
-        <div>
-          <div class="spin-title gold">GOLDEN SPIN</div>
-          <div class="spin-sub">Exclusive premium prizes · Higher value rewards · Staff activation required</div>
+    <div class="spin-wrap" id="goldSpinSection">
+      <div class="spin-head">
+        <div class="spin-title" style="color:rgba(255,215,0,0.95);">
+          <span class="dot" style="background:var(--lux-gold);box-shadow:0 0 18px rgba(255,215,0,0.6);"></span>
+          <span id="goldTitle"></span>
         </div>
-        <div class="flash-pill">Premium</div>
+        <span class="pill" id="goldPill"></span>
       </div>
 
       <div class="wheel-container">
-        <div id="goldenWheel" class="golden-wheel"></div>
-        <div class="wheel-center"></div>
-        <div class="wheel-pointer"></div>
+        <div class="wheel-pointer gold"></div>
+        <div class="gold-wheel" id="goldWheel"></div>
+        <div class="wheel-center">👑</div>
       </div>
 
-      <div class="spin-code-panel" id="goldCodePanel">
-        <div style="font-size: 14px; color: var(--lux-gold); font-weight: 600;">PREMIUM ACTIVATION</div>
-        <div class="spin-code-input">
-          <input type="password" id="goldCodeInput" maxlength="6" placeholder="000000" />
-          <button class="spin-code-btn" id="goldCodeBtn">ACTIVATE</button>
-        </div>
-        <div class="spin-code-msg" id="goldCodeMsg">Golden Spin requires staff activation</div>
+      <div class="spin-actions">
+        <button class="btn secondary" id="goldUnlockBtn"></button>
+        <button class="btn" id="goldSpinBtn" disabled></button>
       </div>
 
-      <button class="spin-btn gold" id="goldSpinButton" disabled>ENTER CODE FOR GOLDEN SPIN</button>
-      
-      <div class="spin-result" id="goldSpinResult">
-        <span class="spin-result-main">Premium Golden Spin</span><br/>
-        <span class="spin-result-note">Higher stakes, better rewards - activate with staff</span>
+      <div class="spin-sub" id="goldSub"></div>
+      <div class="spin-note" id="goldNote"></div>
+
+      <div class="prize-legend" aria-label="Prize highlights">
+        <div class="pulse-line"></div>
+        <div class="legend-row" id="goldLegend"></div>
       </div>
 
-      <div class="gold-prizes-title">GOLDEN SPIN PRIZES</div>
-      <div class="premium-prizes-grid" id="goldPrizesGrid"></div>
+      <div class="result" id="goldResult" style="display:none;"></div>
     </div>
+
   </div>
 
-  <!-- Hidden Admin System -->
-  <div class="admin-bar">
-    System Status: <span id="connectionStatus">Online</span>
+  <div class="quick-nav">
+    <button class="qbtn" id="toTop" title="Top">↑</button>
+    <button class="qbtn" id="toSpin" title="Spin">🎡</button>
   </div>
 
-  <div class="admin-panel" id="adminPanel">
-    <div>STAFF CONTROL PANEL</div>
-    <div class="admin-badge" id="adminStatus">ACCESS LOCKED</div>
+  <script>
+    let LANG = "en";
 
-    <div class="admin-row">
-      <div>Flash Deals Active</div>
-      <div class="switch" id="adminFlashSwitch"><div class="switch-knob"></div></div>
-    </div>
-
-    <div class="admin-row">
-      <div>Spin Sections Visible</div>
-      <div class="switch" id="adminSpinSwitch"><div class="switch-knob"></div></div>
-    </div>
-
-    <div class="admin-row">
-      <div>Flash Duration (seconds)</div>
-      <input id="adminFlashDuration" class="admin-input" type="number" min="30" max="7200" />
-    </div>
-
-    <div class="admin-row">
-      <div>Discount Product</div>
-      <select id="adminDiscountProduct" class="admin-select">
-        <option value="">Select Product</option>
-      </select>
-    </div>
-
-    <div class="admin-row">
-      <div>Discount Percentage</div>
-      <input id="adminDiscountPercent" class="admin-input" type="number" min="5" max="50" placeholder="%" />
-    </div>
-
-    <div class="admin-row">
-      <div>Silver Spin Price (₮)</div>
-      <input id="adminSilverSpinPrice" class="admin-input" type="number" min="1000" max="50000" />
-    </div>
-
-    <div class="admin-row">
-      <div>Golden Spin Price (₮)</div>
-      <input id="adminGoldSpinPrice" class="admin-input" type="number" min="1000" max="50000" />
-    </div>
-
-    <div class="admin-row">
-      <div>Quick Preset</div>
-      <select id="adminFlashPreset" class="admin-select">
-        <option value="">Custom</option>
-        <option value="Quick Boost">Quick Boost (2 min / 15%)</option>
-        <option value="Happy Hour">Happy Hour (60 min / 20%)</option>
-        <option value="Weekend Special">Weekend Special (120 min / 25%)</option>
-      </select>
-    </div>
-
-    <div class="preset-buttons">
-      <button class="preset-btn weekday" data-preset="weekday">Weekday</button>
-      <button class="preset-btn weekend" data-preset="weekend">Weekend</button>
-      <button class="preset-btn party" data-preset="party">Party</button>
-    </div>
-
-    <div id="adminFlashSummary">No active flash deal configuration</div>
-  </div>
-
-  <div class="admin-panel" id="adminLoginPanel" style="display:none;">
-    <div>STAFF ACCESS REQUIRED</div>
-    <div class="admin-login">
-      <input type="password" id="adminCodeInput" maxlength="6" placeholder="000000" />
-      <button id="adminCodeBtn">UNLOCK</button>
-    </div>
-    <div id="adminLoginMsg" style="margin-top:10px;font-size:12px;color:var(--danger);display:none;text-align:center;">
-      Invalid access code
-    </div>
-  </div>
-
-  <div class="footer">
-    This digital menu is for viewing and promotional purposes only.<br>
-    All orders and payments must be processed through our service staff.<br>
-    © 2024 Coco Banana Premium Nightclub Experience
-  </div>
-</div>
-
-<!-- Quick Navigation -->
-<div class="quick-nav">
-  <button onclick="scrollToSection('cocktails')" aria-label="Cocktails">🍸</button>
-  <button onclick="scrollToSection('beer')" aria-label="Beer">🍺</button>
-  <button onclick="scrollToSection('whiskey')" aria-label="Whiskey">🥃</button>
-  <button onclick="scrollToSection('snacks')" aria-label="Snacks">🥨</button>
-  <button id="scrollTopBtn" onclick="smoothScrollToTop()" aria-label="Back to top">⬆</button>
-</div>
-
-<script>
-/* ========= FIREBASE INIT ========= */
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-/* ========= SECURE SPIN CONFIG ========= */
-const SPIN_ACTIVATION_CODE = '032328';
-let isSilverSpinActivated = false;
-let isGoldSpinActivated = false;
-
-/* ========= DATA: MENU ========= */
-const MENU_DATA = [
-  { category: 'cocktails', title: 'Cocktails', tag: 'Premium mixed drinks',
-    items: [
-      { name: 'Margarita', price: 34000, type: 'cocktail', popular: true },
-      { name: 'Negroni', price: 34000, type: 'cocktail' },
-      { name: 'Pornstar Martini', price: 34000, type: 'cocktail', popular: true },
-      { name: 'Manhattan', price: 34000, type: 'cocktail' },
-    ]
-  },
-  { category: 'beer', title: 'Beer', tag: 'Chilled beers & soju',
-    items: [
-      { name: 'Altangobi', price: 11000, type: 'beer', popular: true },
-      { name: 'Tiger', price: 11000, type: 'beer' },
-      { name: 'Ooze', price: 12000, type: 'beer' },
-      { name: 'Heineken', price: 13000, type: 'beer' },
-      { name: 'Kirin', price: 13000, type: 'beer' },
-      { name: 'Chang', price: 13000, type: 'beer' },
-      { name: 'Tsingtao', price: 13000, type: 'beer' },
-      { name: 'Pearl River', price: 13000, type: 'beer' },
-      { name: 'Blue Moon', price: 13000, type: 'beer' },
-      { name: 'Asahi', price: 15000, type: 'beer' },
-      { name: 'Corona', price: 17000, type: 'beer', popular: true },
-      { name: 'Soju', price: 30000, type: 'beer' },
-    ]
-  },
-  { category: 'whiskey', title: 'Whiskey', tag: 'Shot / double / bottle',
-    items: [
-      { name: 'Wild Turkey', priceText: '14K / 28K / 280K', type: 'spirit' },
-      { name: 'Ballantines', priceText: '14K / 28K / 280K', type: 'spirit' },
-      { name: 'Jameson', priceText: '15K / 30K / 300K', type: 'spirit', popular: true },
-      { name: 'Chivas 12 Years', priceText: '16K / 32K / 320K', type: 'spirit' },
-      { name: 'Chivas 18 Years', priceText: '10K / 40K / 400K', type: 'spirit' },
-      { name: 'Jack Daniel\'s', priceText: '30K / 60K / 300K', type: 'spirit' },
-      { name: 'Glenmorangie', priceText: '30K / 60K / 420K', type: 'spirit' },
-    ]
-  },
-  { category: 'vodka', title: 'Vodka', tag: 'Shot / bottle',
-    items: [
-      { name: 'Eden 700ml', priceText: '17K / 119K', type: 'spirit' },
-      { name: 'Velvet 700ml', priceText: '17K / 119K', type: 'spirit' },
-      { name: 'Evok 700ml', priceText: '18K / 126K', type: 'spirit' },
-      { name: 'Finlandia 1L', priceText: '23K / 230K', type: 'spirit' },
-      { name: 'Absolut 1L', priceText: '25K / 250K', type: 'spirit' },
-      { name: 'Grey Goose 1L', priceText: '45K / 450K', type: 'spirit', popular: true },
-      { name: 'Beluga 1L', priceText: '46K / 460K', type: 'spirit' },
-      { name: 'Zubrowka Bison 700ml', priceText: '35K / 220K', type: 'spirit' },
-      { name: 'Zubrowka Biala 700ml', priceText: '35K / 220K', type: 'spirit' },
-    ]
-  },
-  { category: 'gin', title: 'Gin', tag: 'Shot / bottle',
-    items: [
-      { name: 'Barrister 700ml', priceText: '26K / 182K', type: 'spirit' },
-      { name: 'Gordon\'s 1L', priceText: '27K / 270K', type: 'spirit' },
-      { name: 'Bombay 1L', priceText: '28K / 280K', type: 'spirit' },
-      { name: 'Bialowieski 700ml', priceText: '27K / 192K', type: 'spirit' },
-      { name: 'Bialowieski Malina 700ml', priceText: '27K / 192K', type: 'spirit' },
-    ]
-  },
-  { category: 'tequila', title: 'Tequila', tag: 'Shot / bottle',
-    items: [
-      { name: 'Sierra', priceText: '24K / 240K', type: 'spirit' },
-      { name: 'Olmega', priceText: '26K / 182K', type: 'spirit' },
-    ]
-  },
-  { category: 'cognac', title: 'Cognac', tag: 'Premium sips',
-    items: [
-      { name: 'Hennessy V.S 700ml', priceText: '65K / 455K', type: 'spirit' },
-      { name: 'Hennessy V.S.O.P 700ml', priceText: '100K / 700K', type: 'spirit' },
-    ]
-  },
-  { category: 'wine', title: 'Wine', tag: 'Glass / bottle',
-    items: [ { name: 'Maison Castle', priceText: '13K / 97.5K', type: 'spirit' } ]
-  },
-  { category: 'liquor', title: 'Liquor', tag: 'Shot / bottle',
-    items: [
-      { name: 'Balley\'s 1L', priceText: '18K / 180K', type: 'spirit' },
-      { name: 'Grandmarnier 700ml', priceText: '40K / 280K', type: 'spirit' },
-      { name: 'Jägermeister 700ml', priceText: '27K / 189K', type: 'spirit' },
-    ]
-  },
-  { category: 'sets', title: 'Set Packages', tag: 'Party bundles',
-    items: [
-      { name: 'Eden Vodka Set', price: 217000, type: 'set' },
-      { name: 'Velvet Vodka Set', price: 217000, type: 'set' },
-      { name: 'Evok Vodka Set', price: 224000, type: 'set' },
-      { name: 'Finlandia Vodka Set', price: 328000, type: 'set' },
-      { name: 'Absolut Vodka Set', price: 348000, type: 'set' },
-      { name: 'Grey Goose Vodka Set', price: 548000, type: 'set' },
-      { name: 'Beluga Vodka Set', price: 558000, type: 'set' },
-      { name: 'Ballantines Whiskey Set', price: 378000, type: 'set' },
-      { name: 'Jameson Whiskey Set', price: 398000, type: 'set' },
-      { name: 'Jack Daniel\'s Whiskey Set', price: 398000, type: 'set' },
-      { name: 'Chivas 12 Years Whiskey Set', price: 418000, type: 'set' },
-      { name: 'Chivas 18 Years Whiskey Set', price: 498000, type: 'set' },
-    ]
-  },
-  { category: 'snacks', title: 'Snacks', tag: 'Perfect with drinks',
-    items: [
-      { name: 'Chips', price: 15000, type: 'snack', popular: true },
-      { name: 'Nuts', price: 7000, type: 'snack' },
-      { name: 'Gum', price: 5000, type: 'snack' },
-      { name: 'Merci', price: 35000, type: 'snack' },
-      { name: 'Toffifee', price: 15000, type: 'snack' },
-    ]
-  },
-  { category: 'softdrinks', title: 'Soft Drinks', tag: 'Mixers & refreshments',
-    items: [
-      { name: 'Juice (Orange, Apple, Multifruit)', price: 4000, type: 'softdrink' },
-      { name: 'Bonaqua', price: 5000, type: 'softdrink' },
-      { name: 'Cola/Fanta/Sprite', price: 6500, type: 'softdrink' },
-      { name: 'Orgiluun', price: 6500, type: 'softdrink' },
-      { name: 'Red Bull Yellow', price: 7000, type: 'softdrink' },
-      { name: 'Red Bull Blue', price: 10000, type: 'softdrink', popular: true },
-    ]
-  },
-];
-
-/* ========= FLASH STATE ========= */
-let FLASH_DEALS_ACTIVE = false;
-let FLASH_DURATION_SECONDS = 60;
-let CURRENT_FLASH_ITEM = null;
-let CURRENT_DISCOUNT_PERCENT = 10;
-let SHOW_SPIN = true;
-
-let flashTimeLeft = FLASH_DURATION_SECONDS;
-let flashInterval = null;
-
-/* ========= PRIZES ========= */
-const SILVER_SPIN_PRIZES = [
-  { label: 'FREE Soju', tier: 'big', weight: 4, value: '≈30,000₮' },
-  { label: 'FREE Cocktail', tier: 'big', weight: 4, value: '≈34,000₮' },
-  { label: 'FREE Merci Chocolate', tier: 'big', weight: 6, value: '≈35,000₮' },
-  { label: 'FREE Corona Beer', tier: 'big', weight: 6, value: '≈17,000₮' },
-  { label: 'FREE Shot', tier: 'big', weight: 5, value: '≈17,000₮' },
-  { label: 'FREE Altangobi Beer', tier: 'mid', weight: 22 },
-  { label: 'FREE Red Bull Blue', tier: 'mid', weight: 22 },
-  { label: 'FREE Chips', tier: 'mid', weight: 32 },
-  { label: 'FREE Toffifee', tier: 'mid', weight: 32 },
-  { label: 'FREE Mixed Nuts', tier: 'mid', weight: 40 },
-  { label: 'FREE Soft Drink', tier: 'mid', weight: 22 },
-  { label: 'Next Spin 50% OFF', tier: 'mid', weight: 26 },
-  { label: 'FREE Gum', tier: 'low', weight: 90 },
-  { label: 'FREE Juice', tier: 'low', weight: 90 },
-  { label: 'FREE Bonaqua', tier: 'low', weight: 90 },
-  { label: 'FREE Red Bull Yellow', tier: 'low', weight: 60 },
-  { label: 'Try Again Later', tier: 'low', weight: 230 },
-  { label: 'Try Again', tier: 'low', weight: 230 },
-];
-
-const GOLDEN_SPIN_PRIZES = [
-  { label: 'FREE Cocktail', tier: 'big', weight: 4, value: '≈34,000₮' },
-  { label: 'FREE Soju', tier: 'big', weight: 4, value: '≈30,000₮' },
-  { label: 'FREE Corona 2-pack', tier: 'big', weight: 3, value: '≈34,000₮' },
-  { label: 'FREE Merci Chocolate', tier: 'big', weight: 3, value: '≈35,000₮' },
-  { label: 'FREE Whiskey Shot + Beer', tier: 'big', weight: 2, value: '≈29,000₮' },
-  { label: 'FREE Asahi', tier: 'normal', weight: 20, value: '≈15,000₮' },
-  { label: 'FREE Blue Moon', tier: 'normal', weight: 20, value: '≈13,000₮' },
-  { label: 'FREE Red Bull Blue', tier: 'normal', weight: 15 },
-  { label: 'FREE Chips', tier: 'normal', weight: 15 },
-  { label: 'FREE Altangobi Beer', tier: 'normal', weight: 15 },
-  { label: 'FREE Corona', tier: 'normal', weight: 120 },
-  { label: 'FREE Asahi', tier: 'normal', weight: 100 },
-  { label: 'FREE Blue Moon', tier: 'normal', weight: 100 },
-  { label: 'FREE Toffifee', tier: 'normal', weight: 80 },
-  { label: 'FREE Mixed Nuts', tier: 'normal', weight: 80 },
-  { label: '50% OFF Next Spin', tier: 'normal', weight: 80 },
-  { label: 'Try Again', tier: 'normal', weight: 80 }
-];
-
-/* ========= PRESETS ========= */
-const FLASH_PRESETS = [
-  { name: "Quick Boost", duration: 120, discount: 15 },
-  { name: "Happy Hour", duration: 3600, discount: 20 },
-  { name: "Weekend Special", duration: 7200, discount: 25 }
-];
-
-/* ========= HELPERS ========= */
-function formatPrice(value) { return (value / 1000) + 'K'; }
-
-function scrollToSection(category) {
-  const section = document.querySelector(`.section[data-section="${category}"]`);
-  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function smoothScrollToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ========= RENDER MENU ========= */
-const menuContainer = document.getElementById('menuContainer');
-
-function renderMenu() {
-  menuContainer.innerHTML = '';
-  MENU_DATA.forEach(section => {
-    const sectionEl = document.createElement('div');
-    sectionEl.className = 'section';
-    sectionEl.dataset.section = section.category;
-
-    const head = document.createElement('div');
-    head.className = 'section-head';
-    head.innerHTML = `
-      <div class="section-title">${section.title}</div>
-      <div class="section-tag">${section.tag || ''}</div>
-    `;
-    sectionEl.appendChild(head);
-
-    const list = document.createElement('div');
-    list.className = 'card-list';
-
-    section.items.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.dataset.category = section.category;
-      card.dataset.name = item.name;
-
-      let priceText = item.priceText || (item.price ? formatPrice(item.price) + '₮' : '');
-      const basePriceAttr = item.price ? `data-base-price="${item.price}"` : '';
-
-      if (FLASH_DEALS_ACTIVE && CURRENT_FLASH_ITEM === item.name && item.price) {
-        const discountedPrice = Math.round(item.price * (1 - CURRENT_DISCOUNT_PERCENT / 100));
-        priceText = `<span class="strike">${formatPrice(item.price)}₮</span> <span class="discount">${formatPrice(discountedPrice)}₮</span>`;
+    const I18N = {
+      en: {
+        tagline: "Premium Nightclub Experience · Ulaanbaatar · 21+",
+        premiumBadge: "PREMIUM EXPERIENCE",
+        searchPH: "Search drinks, sets, snacks...",
+        tabs: {
+          all: "ALL",
+          cocktails: "COCKTAILS",
+          beer: "BEER",
+          whiskey: "WHISKEY",
+          vodka: "VODKA",
+          gin: "GIN",
+          tequila: "TEQUILA",
+          cognac: "COGNAC",
+          wine: "WINE",
+          liqueur: "LIQUOR",
+          sets: "SET PACKAGES",
+          snacks: "SNACKS",
+          soft: "SOFT DRINK"
+        },
+        proofTitle: "TONIGHT",
+        proofEarly: "✨ Staff pick · Start smooth, end legendary",
+        proofPeak: "🔥 Most popular after 10PM",
+        proofLate: "💎 Best for groups · Sets feel premium",
+        pickerTitle: "HELP ME CHOOSE",
+        pickerPill: "Smart Picks",
+        mood: "Mood",
+        budget: "Budget",
+        strength: "Strength",
+        moodOpt: { chill: "Chill", party: "Party", heavy: "Strong", sweet: "Sweet" },
+        budgetOpt: { low: "₮", mid: "₮₮", high: "₮₮₮" },
+        strengthOpt: { light: "Light", normal: "Normal", strong: "Strong" },
+        pickerBtn: "SHOW RECOMMENDATIONS",
+        pickerResultTitle: "Tonight’s picks",
+        pickerHint: "Ask staff for the best pairing.",
+        meta: {
+          sets: "Best for groups · Best value",
+          cocktails: "Great for 1–2 people",
+          beer: "Great for groups",
+          compareSets: "✔ Better value than ordering individually",
+          upsellSnack: "Pairs well with snacks",
+          upsellSoft: "Pairs well with soft drinks"
+        },
+        spin: {
+          silverTitle: "SILVER SPIN",
+          silverPill: "Exclusive",
+          silverSub: "Unlock → Spin → Show staff to claim.",
+          silverNote: "Hot prizes inside. Timing matters.",
+          goldTitle: "GOLDEN SPIN",
+          goldPill: "Premium",
+          goldSub: "Unlock → Spin → Show staff to claim.",
+          goldNote: "Premium wheel · Big moments happen fast.",
+          unlock: "UNLOCK",
+          spinNow: "SPIN NOW",
+          locked: "ENTER ACCESS",
+          invalid: "Access denied.",
+          claim: "Show staff to claim your prize.",
+          spinning: "Spinning…"
+        }
+      },
+      mn: {
+        tagline: "Nightclub · Улаанбаатар · 21+",
+        premiumBadge: "ПРЕМИУМ",
+        searchPH: "Уух зүйл, багц, зууш хайх...",
+        tabs: {
+          all: "БҮГД",
+          cocktails: "КОКТЕЙЛЬ",
+          beer: "ШАР АЙРАГ",
+          whiskey: "ВИСКИ",
+          vodka: "АРХИ",
+          gin: "ЖИН",
+          tequila: "ТЕКИЛА",
+          cognac: "КОНЬЯК",
+          wine: "ДАРС",
+          liqueur: "ЛИКЁР",
+          sets: "БАГЦ",
+          snacks: "ЗУУШ",
+          soft: "УНДАА"
+        },
+        proofTitle: "ӨНӨӨ ОРОЙ",
+        proofEarly: "✨ Staff pick · Start smooth, end legendary",
+        proofPeak: "🔥 22:00 цагаас хойш хамгийн их захиалсан",
+        proofLate: "💎 Олуулаа багц · Хамгийн хямд үнэ",
+        pickerTitle: "СОНГОЛТ ХИЙХЭД ТУСЛАХ",
+        pickerPill: "Санал",
+        mood: "Уур амьсгал",
+        budget: "Төсөв",
+        strength: "Градус",
+        moodOpt: { chill: "Chill", party: "Party", heavy: "Heavy", sweet: "Sweet" },
+        budgetOpt: { low: "₮ (Энгийн)", mid: "₮₮ (Дундаж)", high: "₮₮₮ (Өндөр)" },
+        strengthOpt: { light: "Зөөлөн", normal: "Дундаж", strong: "Хүчтэй" },
+        pickerBtn: "САНАЛ БОЛГОХ",
+        pickerResultTitle: "Өнөө оройн санал",
+        pickerHint: "Захиалга өгөх бол зөөгчид хандана уу.",
+        meta: {
+          sets: "Олон хүнд · Ашигтай сонголт",
+          cocktails: "1–2 хүнд тохиромжтой",
+          beer: "Олуулаа явж байх үед тохиромжтой",
+          compareSets: "✔ Нэг нэгээр авахтай харьцуулахад боломжийн үнэтэй",
+          upsellSnack: "Зууштай хослуулахад тохиромжтой",
+          upsellSoft: "Ундаатай хослуулахад тохиромжтой"
+        },
+        spin: {
+          silverTitle: "МӨНГӨН ХҮРД",
+          silverPill: "Онцгой",
+          silverSub: "Нээх → Эргүүлэх → Шагналаа ажилтанд үзүүлнэ үү.",
+          silverNote: "Шагналууд хүлээж байна.",
+          goldTitle: "АЛТАН ХҮРД",
+          goldPill: "Премиум",
+          goldSub: "Нээх → Эргүүлэх → Шагналаа ажилтанд үзүүлнэ үү.",
+          goldNote: "Премиум хүрд · Том шагнал ойрхон.",
+          unlock: "НЭЭХ",
+          spinNow: "ЭРГҮҮЛЭХ",
+          locked: "НЭВТРЭХ",
+          invalid: "Хандах эрхгүй байна.",
+          claim: "Шагналаа авахын тулд ажилтанд үзүүлнэ үү.",
+          spinning: "Эргүүлж байна…"
+        }
       }
+    };
 
-      card.innerHTML = `
-        <div class="card-main">
-          <div><div class="card-name">${item.name}</div></div>
-          <div class="card-price" ${basePriceAttr}>${priceText}</div>
+    function t(path){
+      const parts = path.split(".");
+      let cur = I18N[LANG];
+      for (const p of parts) cur = cur?.[p];
+      return (cur === undefined || cur === null) ? path : cur;
+    }
+
+    const MENU = [
+      { category:"cocktails", titleKey:"tabs.cocktails", items:[
+        { name:"Margarita", price:34000 },
+        { name:"Negroni", price:34000 },
+        { name:"Pornstar Martini", price:34000 },
+        { name:"Manhattan", price:34000 },
+      ]},
+      { category:"beer", titleKey:"tabs.beer", items:[
+        { name:"Altangobi", price:11000 },
+        { name:"Tiger", price:11000 },
+        { name:"Ooze", price:12000 },
+        { name:"Heineken", price:13000 },
+        { name:"Kirin", price:13000 },
+        { name:"Chang", price:13000 },
+        { name:"Tsingtao", price:13000 },
+        { name:"Pearl River", price:13000 },
+        { name:"Blue Moon", price:13000 },
+        { name:"Asahi", price:15000 },
+        { name:"Corona", price:17000 },
+        { name:"Soju", price:30000 },
+      ]},
+      { category:"whiskey", titleKey:"tabs.whiskey", items:[
+        { name:"Wild Turkey", priceText:"14K / 28K / 280K" },
+        { name:"Ballantines", priceText:"14K / 28K / 280K" },
+        { name:"Jameson", priceText:"15K / 30K / 300K" },
+        { name:"Chivas 12 Years", priceText:"16K / 32K / 320K" },
+        { name:"Chivas 18 Years", priceText:"10K / 40K / 400K" },
+        { name:"Jack Daniel’s", priceText:"30K / 60K / 300K" },
+        { name:"Glenmorangie", priceText:"30K / 60K / 420K" },
+      ]},
+      { category:"vodka", titleKey:"tabs.vodka", items:[
+        { name:"Eden 700ml", priceText:"17K / 119K" },
+        { name:"Velvet 700ml", priceText:"17K / 119K" },
+        { name:"Evok 700ml", priceText:"18K / 126K" },
+        { name:"Finlandia 1L", priceText:"23K / 230K" },
+        { name:"Absolut 1L", priceText:"25K / 250K" },
+        { name:"Grey Goose 1L", priceText:"45K / 450K" },
+        { name:"Beluga 1L", priceText:"46K / 460K" },
+        { name:"Zubrowka Bison 700ml", priceText:"35K / 220K" },
+        { name:"Zubrowka Biala 700ml", priceText:"35K / 220K" },
+      ]},
+      { category:"gin", titleKey:"tabs.gin", items:[
+        { name:"Barrister 700ml", priceText:"26K / 182K" },
+        { name:"Gordon’s 1L", priceText:"27K / 270K" },
+        { name:"Bombay 1L", priceText:"28K / 280K" },
+        { name:"Bialowieski 700ml", priceText:"27K / 192K" },
+        { name:"Bialowieski Malina 700ml", priceText:"27K / 192K" },
+      ]},
+      { category:"tequila", titleKey:"tabs.tequila", items:[
+        { name:"Sierra", priceText:"24K / 240K" },
+        { name:"Olmega", priceText:"26K / 182K" },
+      ]},
+      { category:"cognac", titleKey:"tabs.cognac", items:[
+        { name:"Hennessy V.S 700ml", priceText:"65K / 455K" },
+        { name:"Hennessy V.S.O.P 700ml", priceText:"100K / 700K" },
+      ]},
+      { category:"wine", titleKey:"tabs.wine", items:[
+        { name:"Maison Castle", priceText:"13K / 97.5K" },
+      ]},
+      { category:"liqueur", titleKey:"tabs.liqueur", items:[
+        { name:"Balley's 1L", priceText:"18K / 180K" },
+        { name:"Grandmarnier 700ml", priceText:"40K / 280K" },
+        { name:"Jägermeister 700ml", priceText:"27K / 189K" },
+      ]},
+      { category:"sets", titleKey:"tabs.sets", items:[
+        { name:"Vodka Set · Eden", price:217000 },
+        { name:"Vodka Set · Velvet", price:217000 },
+        { name:"Vodka Set · Evok", price:224000 },
+        { name:"Vodka Set · Finlandia", price:328000 },
+        { name:"Vodka Set · Absolut", price:348000 },
+        { name:"Vodka Set · Grey Goose", price:548000 },
+        { name:"Vodka Set · Beluga", price:558000 },
+
+        { name:"Whiskey Set · Ballantines", price:378000 },
+        { name:"Whiskey Set · Jameson", price:398000 },
+        { name:"Whiskey Set · Jack Daniel’s", price:398000 },
+        { name:"Whiskey Set · Chivas 12 Years", price:418000 },
+        { name:"Whiskey Set · Chivas 18 Years", price:498000 },
+      ]},
+      { category:"snacks", titleKey:"tabs.snacks", items:[
+        { name:"Chips", price:15000 },
+        { name:"Nuts", price:7000 },
+        { name:"Gum", price:5000 },
+        { name:"Merci", price:35000 },
+        { name:"Toffee", price:15000 },
+      ]},
+      { category:"soft", titleKey:"tabs.soft", items:[
+        { name:"Juice (Orange / Apple / Multifruit)", price:4000 },
+        { name:"Bonaqua", price:5000 },
+        { name:"Cola / Fanta / Sprite", price:6500 },
+        { name:"Orgiluun", price:6500 },
+        { name:"Red Bull Yellow", price:7000 },
+        { name:"Red Bull Blue", price:10000 },
+      ]},
+    ];
+
+    const TAB_ORDER = ["all", ...MENU.map(s => s.category)];
+
+    const el = (id) => document.getElementById(id);
+
+    const menuEl = el("menu");
+    const tabsEl = el("tabs");
+    const searchInput = el("searchInput");
+    const searchClear = el("searchClear");
+
+    const taglineEl = el("tagline");
+    const premiumBadgeTextEl = el("premiumBadgeText");
+
+    const proofTitleEl = el("proofTitle");
+    const proofTextEl = el("proofText");
+
+    const pickerTitleEl = el("pickerTitle");
+    const pickerPillEl = el("pickerPill");
+    const pickMoodEl = el("pickMood");
+    const pickBudgetEl = el("pickBudget");
+    const pickStrengthEl = el("pickStrength");
+    const pickerGoEl = el("pickerGo");
+    const pickerResultEl = el("pickerResult");
+
+    const silverTitleEl = el("silverTitle");
+    const silverPillEl = el("silverPill");
+    const silverSubEl = el("silverSub");
+    const silverNoteEl = el("silverNote");
+    const silverWheelEl = el("silverWheel");
+    const silverUnlockBtn = el("silverUnlockBtn");
+    const silverSpinBtn = el("silverSpinBtn");
+    const silverResultEl = el("silverResult");
+    const silverLegendEl = el("silverLegend");
+
+    const goldTitleEl = el("goldTitle");
+    const goldPillEl = el("goldPill");
+    const goldSubEl = el("goldSub");
+    const goldNoteEl = el("goldNote");
+    const goldWheelEl = el("goldWheel");
+    const goldUnlockBtn = el("goldUnlockBtn");
+    const goldSpinBtn = el("goldSpinBtn");
+    const goldResultEl = el("goldResult");
+    const goldLegendEl = el("goldLegend");
+
+    const langSwitch = el("langSwitch");
+    const langEN = el("langEN");
+    const langMN = el("langMN");
+
+    el("toTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    el("toSpin").addEventListener("click", () => el("silverSpinSection").scrollIntoView({ behavior: "smooth", block: "start" }));
+
+    function proofKeyByTime(){
+      const h = new Date().getHours();
+      if (h < 22) return "proofEarly";
+      if (h < 1) return "proofPeak";
+      return "proofLate";
+    }
+
+    function buildPickerOptions(){
+      pickMoodEl.innerHTML = `
+        <option value="chill">${I18N[LANG].moodOpt.chill}</option>
+        <option value="party">${I18N[LANG].moodOpt.party}</option>
+        <option value="heavy">${I18N[LANG].moodOpt.heavy}</option>
+        <option value="sweet">${I18N[LANG].moodOpt.sweet}</option>
+      `;
+      pickBudgetEl.innerHTML = `
+        <option value="low">${I18N[LANG].budgetOpt.low}</option>
+        <option value="mid">${I18N[LANG].budgetOpt.mid}</option>
+        <option value="high">${I18N[LANG].budgetOpt.high}</option>
+      `;
+      pickStrengthEl.innerHTML = `
+        <option value="light">${I18N[LANG].strengthOpt.light}</option>
+        <option value="normal">${I18N[LANG].strengthOpt.normal}</option>
+        <option value="strong">${I18N[LANG].strengthOpt.strong}</option>
+      `;
+    }
+
+    function pickRecommendations({ mood, budget, strength }){
+      const picks = [];
+
+      if (budget === "high") picks.push({ label: (LANG==="mn" ? "Багц (хамгийн ашигтай)" : "Set (best value)") });
+      if (budget === "low") picks.push({ label: "Altangobi" });
+
+      if (mood === "sweet") picks.push({ label: "Pornstar Martini" });
+      if (mood === "party") picks.push({ label: "Margarita" });
+      if (mood === "chill") picks.push({ label: "Negroni" });
+
+      if (strength === "strong" || mood === "heavy") picks.push({ label: "Jameson" });
+      if (strength === "light" && budget !== "low") picks.push({ label: (LANG==="mn" ? "Дарс (хөнгөн)" : "Wine (light)") });
+
+      picks.push({ label: (LANG==="mn" ? "Зууш: Nuts эсвэл Chips" : "Snack: Nuts or Chips") });
+
+      const seen = new Set();
+      return picks.filter(p => (seen.has(p.label) ? false : (seen.add(p.label), true))).slice(0, 3);
+    }
+
+    pickerGoEl.addEventListener("click", () => {
+      const picks = pickRecommendations({ mood: pickMoodEl.value, budget: pickBudgetEl.value, strength: pickStrengthEl.value });
+      pickerResultEl.style.display = "block";
+      pickerResultEl.innerHTML = `
+        <div class="main">${I18N[LANG].pickerResultTitle}</div>
+        <div class="sub" style="text-align:left;margin-top:10px;">
+          ${picks.map(p => `• ${p.label}`).join("<br/>")}
+          <div style="margin-top:10px;opacity:.9;">${I18N[LANG].pickerHint}</div>
         </div>
       `;
+    });
 
-      if (item.popular) {
-        const badge = document.createElement('div');
-        badge.className = 'popular-badge';
-        badge.textContent = 'POPULAR';
-        card.appendChild(badge);
+    let activeTab = "all";
+    let searchTerm = "";
+
+    function formatPrice(mnt){
+      if (typeof mnt === "string") return mnt;
+      try { return new Intl.NumberFormat("en-US").format(mnt) + "₮"; }
+      catch { return String(mnt) + "₮"; }
+    }
+
+    function renderTabs(){
+      tabsEl.innerHTML = "";
+      for (const tab of TAB_ORDER){
+        const btn = document.createElement("button");
+        btn.className = "tab-btn" + (tab === activeTab ? " active" : "");
+        btn.dataset.tab = tab;
+        btn.textContent = (tab === "all") ? t("tabs.all") : t("tabs." + tab);
+        btn.addEventListener("click", () => {
+          activeTab = tab;
+          document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === activeTab));
+          renderMenu();
+        });
+        tabsEl.appendChild(btn);
+      }
+    }
+
+    function filterItems(items){
+      if (!searchTerm) return items;
+      const q = searchTerm.toLowerCase();
+      return items.filter(it => it.name.toLowerCase().includes(q));
+    }
+
+    function cardMeta(category, itemName){
+      let meta = "";
+      if (category === "sets") meta = I18N[LANG].meta.sets;
+      else if (category === "cocktails") meta = I18N[LANG].meta.cocktails;
+      else if (category === "beer") meta = I18N[LANG].meta.beer;
+
+      let upsell = "";
+      if (category === "cocktails" || category === "whiskey" || category === "vodka" || category === "gin" || category === "tequila") upsell = I18N[LANG].meta.upsellSnack;
+      if (category === "beer") upsell = I18N[LANG].meta.upsellSnack;
+      if (category === "sets") upsell = I18N[LANG].meta.upsellSoft;
+
+      let compare = "";
+      if (category === "sets") compare = I18N[LANG].meta.compareSets;
+
+      if (itemName.toLowerCase().includes("set") && itemName.toLowerCase().includes("beluga")){
+        meta = (LANG==="mn") ? "VIP ширээний сонголт · Онцгой мэдрэмж" : "VIP table pick · Premium feel";
       }
 
-      list.appendChild(card);
+      return { meta, compare, upsell };
+    }
+
+    function renderMenu(){
+      menuEl.innerHTML = "";
+
+      const filteredSections = MENU
+        .filter(sec => (activeTab === "all" ? true : sec.category === activeTab))
+        .map(sec => ({ ...sec, items: filterItems(sec.items) }))
+        .filter(sec => sec.items.length > 0);
+
+      if (filteredSections.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "panel";
+        empty.innerHTML = `<div style="font-weight:900;color:rgba(255,255,255,0.8);">No items found.</div>`;
+        menuEl.appendChild(empty);
+        return;
+      }
+
+      for (const sec of filteredSections){
+        const section = document.createElement("div");
+        section.className = "section";
+        section.id = "sec-" + sec.category;
+
+        const header = document.createElement("div");
+        header.className = "section-title";
+        header.innerHTML = `<h2>${t(sec.titleKey)}</h2><span>${sec.items.length}</span>`;
+        section.appendChild(header);
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+
+        for (const item of sec.items){
+          const card = document.createElement("div");
+          card.className = "card";
+
+          const { meta, compare, upsell } = cardMeta(sec.category, item.name);
+          const priceOut = item.priceText ? item.priceText : formatPrice(item.price);
+
+          card.innerHTML = `
+            <div class="card-main">
+              <div class="card-left">
+                <div class="card-name">${item.name}</div>
+                ${meta ? `<div class="card-meta">${meta}</div>` : ""}
+                ${compare ? `<div class="card-compare">${compare}</div>` : ""}
+                ${upsell ? `<div class="card-upsell">${upsell}</div>` : ""}
+              </div>
+              <div class="card-price">${priceOut}</div>
+            </div>
+          `;
+          grid.appendChild(card);
+        }
+
+        section.appendChild(grid);
+        menuEl.appendChild(section);
+      }
+    }
+
+    searchInput.addEventListener("input", () => {
+      searchTerm = searchInput.value.trim();
+      searchClear.style.display = searchTerm ? "block" : "none";
+      renderMenu();
     });
 
-    sectionEl.appendChild(list);
-    menuContainer.appendChild(sectionEl);
-  });
-}
-
-/* ========= TABS ========= */
-const tabsEl = document.getElementById('tabs');
-function setActiveTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-  document.querySelectorAll('.section').forEach(sec => {
-    const cat = sec.dataset.section;
-    sec.style.display = (tab === 'all' || tab === cat) ? '' : 'none';
-  });
-}
-tabsEl.addEventListener('click', e => {
-  const btn = e.target.closest('.tab-btn');
-  if (!btn) return;
-  setActiveTab(btn.dataset.tab);
-});
-
-/* ========= FLASH UI ========= */
-const flashItemName = document.getElementById('flashItemName');
-const flashItemMeta = document.getElementById('flashItemMeta');
-const flashTimerValue = document.getElementById('flashTimerValue');
-const flashMeterFill = document.getElementById('flashMeterFill');
-const flashBar = document.getElementById('flashBar');
-
-function formatTime(sec) {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-}
-
-function updateFlashUI() {
-  flashBar.classList.remove('active', 'ending-soon');
-
-  if (!FLASH_DEALS_ACTIVE) {
-    flashItemName.textContent = 'No active deals';
-    flashItemMeta.textContent = 'Check back for exclusive offers';
-    flashTimerValue.textContent = '--:--';
-    flashMeterFill.style.transform = 'scaleX(0)';
-    flashBar.classList.add('inactive');
-    return;
-  }
-
-  flashItemName.textContent = CURRENT_FLASH_ITEM || 'Flash Deal Active';
-  flashItemMeta.textContent = `${CURRENT_DISCOUNT_PERCENT}% discount`;
-  flashTimerValue.textContent = formatTime(flashTimeLeft);
-  const progress = Math.max(0, flashTimeLeft / FLASH_DURATION_SECONDS);
-  flashMeterFill.style.transform = 'scaleX(' + progress + ')';
-  flashBar.classList.remove('inactive');
-  flashBar.classList.add('active');
-
-  if (flashTimeLeft <= 10 || flashTimeLeft <= FLASH_DURATION_SECONDS * 0.15) {
-    flashBar.classList.add('ending-soon');
-  }
-}
-
-function startFlashLoop() {
-  if (flashInterval) clearInterval(flashInterval);
-
-  if (!FLASH_DEALS_ACTIVE) {
-    updateFlashUI();
-    renderMenu();
-    return;
-  }
-
-  flashTimeLeft = FLASH_DURATION_SECONDS;
-  updateFlashUI();
-  renderMenu();
-
-  flashInterval = setInterval(() => {
-    if (!FLASH_DEALS_ACTIVE) {
-      updateFlashUI();
+    searchClear.addEventListener("click", () => {
+      searchInput.value = "";
+      searchTerm = "";
+      searchClear.style.display = "none";
+      searchInput.focus();
       renderMenu();
-      return;
-    }
-    flashTimeLeft--;
-    if (flashTimeLeft <= 0) {
-      FLASH_DEALS_ACTIVE = false;
-      updateFlashUI();
-      renderMenu();
-      clearInterval(flashInterval);
-      saveFirebaseState({ flashActive: false });
-    } else {
-      updateFlashUI();
-    }
-  }, 1000);
-}
+    });
 
-/* ========= SPIN DOM ========= */
-const spinButton = document.getElementById('spinButton');
-const spinResultEl = document.getElementById('spinResult');
-const spinWheel = document.getElementById('spinWheel');
-const spinCodePanel = document.getElementById('spinCodePanel');
-const spinCodeInput = document.getElementById('spinCodeInput');
-const spinCodeBtn = document.getElementById('spinCodeBtn');
-const spinCodeMsg = document.getElementById('spinCodeMsg');
-const silverPrizesGridEl = document.getElementById('silverPrizesGrid');
-
-const goldSpinButton = document.getElementById('goldSpinButton');
-const goldSpinResultEl = document.getElementById('goldSpinResult');
-const goldenWheel = document.getElementById('goldenWheel');
-const goldCodePanel = document.getElementById('goldCodePanel');
-const goldCodeInput = document.getElementById('goldCodeInput');
-const goldCodeBtn = document.getElementById('goldCodeBtn');
-const goldCodeMsg = document.getElementById('goldCodeMsg');
-const goldPrizesGridEl = document.getElementById('goldPrizesGrid');
-
-/* ========= SPIN HELPERS ========= */
-function buildPrizePool(prizes) {
-  const pool = [];
-  prizes.forEach(prize => { for (let i = 0; i < prize.weight; i++) pool.push(prize); });
-  return pool;
-}
-const SILVER_SPIN_POOL = buildPrizePool(SILVER_SPIN_PRIZES);
-const GOLD_SPIN_POOL = buildPrizePool(GOLDEN_SPIN_PRIZES);
-
-function randomFromPool(pool) {
-  const idx = Math.floor(Math.random() * pool.length);
-  return pool[idx];
-}
-
-function renderSilverPrizeGrid() {
-  silverPrizesGridEl.innerHTML = '';
-  SILVER_SPIN_PRIZES.forEach(prize => {
-    const div = document.createElement('div');
-    div.className = 'prize-item' + (prize.tier === 'big' ? ' big-prize' : '');
-    div.innerHTML = `
-      <div class="prize-text">${prize.label}</div>
-      ${prize.value ? `<div class="prize-value">${prize.value}</div>` : ''}
-    `;
-    silverPrizesGridEl.appendChild(div);
-  });
-}
-
-function renderGoldPrizeGrid() {
-  goldPrizesGridEl.innerHTML = '';
-  GOLDEN_SPIN_PRIZES.forEach(prize => {
-    const div = document.createElement('div');
-    div.className = 'prize-item' + (prize.tier === 'big' ? ' big-prize' : '');
-    div.innerHTML = `
-      <div class="prize-text">${prize.label}</div>
-      ${prize.value ? `<div class="prize-value">${prize.value}</div>` : ''}
-    `;
-    goldPrizesGridEl.appendChild(div);
-  });
-}
-
-/* ========= SILVER SPIN ========= */
-function activateSilverSpin() {
-  isSilverSpinActivated = true;
-  spinButton.disabled = false;
-  spinButton.textContent = 'SPIN THE WHEEL';
-  spinCodeInput.value = '';
-  spinCodeMsg.textContent = 'Silver Spin activated · One-time spin.';
-  spinCodeMsg.className = 'spin-code-msg spin-code-success';
-  setTimeout(() => { spinCodePanel.style.display = 'none'; }, 3000);
-}
-function deactivateSilverSpin() {
-  isSilverSpinActivated = false;
-  spinButton.disabled = true;
-  spinButton.textContent = 'ENTER CODE TO SPIN';
-  spinCodePanel.style.display = '';
-  spinCodeMsg.textContent = 'Payment required before spin activation';
-  spinCodeMsg.className = 'spin-code-msg';
-}
-spinCodeBtn.addEventListener('click', () => {
-  const code = spinCodeInput.value.trim();
-  if (code === SPIN_ACTIVATION_CODE) activateSilverSpin();
-  else {
-    spinCodeMsg.textContent = 'Invalid code. Please contact staff.';
-    spinCodeMsg.className = 'spin-code-msg spin-code-error';
-  }
-});
-spinCodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') spinCodeBtn.click(); });
-
-spinButton.addEventListener('click', () => {
-  if (!isSilverSpinActivated || spinButton.disabled) return;
-  spinButton.disabled = true; spinButton.classList.add('spinning');
-  spinWheel.classList.add('spinning');
-  spinButton.innerHTML = `<span class="loading-spinner"></span> Spinning...`;
-
-  spinResultEl.innerHTML = `
-    <span class="spin-result-main">Spinning...</span><br/>
-    <span class="spin-result-note">Good luck!</span>
-  `;
-
-  let ticks = 0;
-  const maxTicks = 25;
-  const tickInterval = 150;
-  const tickTimer = setInterval(() => {
-    ticks++;
-    const tempPrize = randomFromPool(SILVER_SPIN_POOL);
-    spinResultEl.innerHTML = `
-      <span class="spin-result-main">${tempPrize.label}</span><br/>
-      <span class="spin-result-note">...</span>
-    `;
-    if (ticks >= maxTicks) {
-      clearInterval(tickTimer);
-      const prize = randomFromPool(SILVER_SPIN_POOL);
-      let tierClass = 'low', prefix = 'Result';
-      if (prize.tier === 'big') { tierClass = 'big'; prefix = 'BIG WIN 🎉'; }
-      else if (prize.tier === 'mid') { tierClass = 'mid'; prefix = 'Win!'; }
-      const valueText = (prize.value) ? ` (${prize.value})` : '';
-      spinResultEl.innerHTML = `
-        <span class="spin-result-main ${tierClass}">${prefix}: ${prize.label}${valueText}</span><br/>
-        <span class="spin-result-note">Show staff to claim your prize.</span>
-      `;
-      setTimeout(() => {
-        deactivateSilverSpin();
-        spinButton.classList.remove('spinning');
-        spinWheel.classList.remove('spinning');
-        spinButton.textContent = 'ENTER CODE TO SPIN';
-      }, 4000);
-    }
-  }, tickInterval);
-});
-
-/* ========= GOLDEN SPIN ========= */
-let goldenSpinDiscountActive = false;
-function activateGoldSpin() {
-  isGoldSpinActivated = true;
-  goldSpinButton.disabled = false;
-  goldSpinButton.textContent = 'GOLDEN SPIN · 20,000₮';
-  goldCodeInput.value = '';
-  goldCodeMsg.textContent = 'Golden Spin activated · One-time spin.';
-  goldCodeMsg.className = 'spin-code-msg spin-code-success';
-  setTimeout(() => { goldCodePanel.style.display = 'none'; }, 3000);
-}
-function deactivateGoldSpin() {
-  isGoldSpinActivated = false;
-  goldSpinButton.disabled = true;
-  goldSpinButton.textContent = 'ENTER CODE FOR GOLDEN SPIN';
-  goldSpinButton.classList.remove('discounted');
-  goldSpinButton.style.background = '';
-  goldCodePanel.style.display = '';
-  goldCodeMsg.textContent = 'Golden Spin requires staff activation';
-  goldCodeMsg.className = 'spin-code-msg';
-  goldenSpinDiscountActive = false;
-}
-goldCodeBtn.addEventListener('click', () => {
-  const code = goldCodeInput.value.trim();
-  if (code === SPIN_ACTIVATION_CODE) activateGoldSpin();
-  else {
-    goldCodeMsg.textContent = 'Invalid code. Please contact staff.';
-    goldCodeMsg.className = 'spin-code-msg spin-code-error';
-  }
-});
-goldCodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') goldCodeBtn.click(); });
-
-function applyGoldenSpinDiscountOnce() {
-  const originalText = 'GOLDEN SPIN · 20,000₮';
-  const discountText = 'GOLDEN SPIN · 10,000₮ 🔥';
-  goldenSpinDiscountActive = true;
-  goldSpinButton.textContent = discountText;
-  goldSpinButton.style.background = 'linear-gradient(135deg, #ff6b00, #ffd700)';
-  goldSpinButton.classList.add('discounted');
-  setTimeout(() => {
-    goldenSpinDiscountActive = false;
-    goldSpinButton.textContent = originalText;
-    goldSpinButton.style.background = '';
-    goldSpinButton.classList.remove('discounted');
-  }, 60000);
-}
-
-goldSpinButton.addEventListener('click', () => {
-  if (!isGoldSpinActivated || goldSpinButton.disabled) return;
-  goldSpinButton.disabled = true; goldSpinButton.classList.add('spinning');
-  goldenWheel.classList.add('spinning');
-  goldSpinButton.innerHTML = `<span class="loading-spinner"></span> Spinning...`;
-
-  goldSpinResultEl.innerHTML = `
-    <span class="spin-result-main">Spinning...</span><br/>
-    <span class="spin-result-note">Good luck!</span>
-  `;
-
-  let ticks = 0;
-  const maxTicks = 30;
-  const tickInterval = 150;
-  const tickTimer = setInterval(() => {
-    ticks++;
-    const tempPrize = randomFromPool(GOLD_SPIN_POOL);
-    goldSpinResultEl.innerHTML = `
-      <span class="spin-result-main">${tempPrize.label}</span><br/>
-      <span class="spin-result-note">...</span>
-    `;
-    if (ticks >= maxTicks) {
-      clearInterval(tickTimer);
-      const prize = randomFromPool(GOLD_SPIN_POOL);
-      let tierClass = 'low', prefix = 'Result';
-      if (prize.tier === 'big') { tierClass = 'big'; prefix = 'GOLD WIN 💎'; }
-      const valueText = prize.value ? ` (${prize.value})` : '';
-      goldSpinResultEl.innerHTML = `
-        <span class="spin-result-main ${tierClass}">${prefix}: ${prize.label}${valueText}</span><br/>
-        <span class="spin-result-note">Show staff to claim your prize.</span>
-      `;
-      if (prize.label.includes('50% OFF Next Spin')) applyGoldenSpinDiscountOnce();
-      setTimeout(() => {
-        deactivateGoldSpin();
-        goldSpinButton.classList.remove('spinning');
-        goldenWheel.classList.remove('spinning');
-        goldSpinButton.textContent = 'ENTER CODE FOR GOLDEN SPIN';
-      }, 4000);
-    }
-  }, tickInterval);
-});
-
-/* ========= ADMIN PANEL ========= */
-const ADMIN_CODE = '032328';
-const adminPanel = document.getElementById('adminPanel');
-const adminLoginPanel = document.getElementById('adminLoginPanel');
-const adminStatus = document.getElementById('adminStatus');
-const adminFlashSwitch = document.getElementById('adminFlashSwitch');
-const adminSpinSwitch = document.getElementById('adminSpinSwitch');
-const adminFlashDuration = document.getElementById('adminFlashDuration');
-const adminDiscountProduct = document.getElementById('adminDiscountProduct');
-const adminDiscountPercent = document.getElementById('adminDiscountPercent');
-const adminFlashPreset = document.getElementById('adminFlashPreset');
-const adminCodeInput = document.getElementById('adminCodeInput');
-const adminCodeBtn = document.getElementById('adminCodeBtn');
-const adminLoginMsg = document.getElementById('adminLoginMsg');
-const adminFlashSummary = document.getElementById('adminFlashSummary');
-const connectionStatus = document.getElementById('connectionStatus');
-const logoWrap = document.querySelector('.logo-wrap');
-
-/* Hidden admin triggers (5 taps OR 5-second hold on logo) */
-let logoTapCount = 0;
-let logoTapTimeout = null;
-let logoPressTimer = null;
-
-function openAdminLogin() {
-  // If already unlocked, just show panel
-  if (adminPanel.style.display === 'block') {
-    adminLoginPanel.style.display = 'none';
-    return;
-  }
-  adminLoginPanel.style.display = 'block';
-  adminLoginMsg.style.display = 'none';
-  adminCodeInput.value = '';
-  adminCodeInput.focus();
-}
-
-function handleLogoTap() {
-  logoTapCount++;
-  clearTimeout(logoTapTimeout);
-  if (logoTapCount >= 5) {
-    logoTapCount = 0;
-    openAdminLogin();
-  } else {
-    logoTapTimeout = setTimeout(() => { logoTapCount = 0; }, 1500);
-  }
-}
-
-function startLogoPress(e) {
-  // prevent long-press text selection on mobile
-  if (e.type === 'touchstart') e.preventDefault();
-  if (logoPressTimer) return;
-  logoPressTimer = setTimeout(() => {
-    logoPressTimer = null;
-    openAdminLogin();
-  }, 5000);
-}
-
-function cancelLogoPress() {
-  if (logoPressTimer) {
-    clearTimeout(logoPressTimer);
-    logoPressTimer = null;
-  }
-}
-
-if (logoWrap) {
-  logoWrap.addEventListener('click', handleLogoTap);
-  logoWrap.addEventListener('mousedown', startLogoPress);
-  logoWrap.addEventListener('touchstart', startLogoPress);
-  logoWrap.addEventListener('mouseup', cancelLogoPress);
-  logoWrap.addEventListener('mouseleave', cancelLogoPress);
-  logoWrap.addEventListener('touchend', cancelLogoPress);
-  logoWrap.addEventListener('touchcancel', cancelLogoPress);
-}
-
-/* Admin helpers */
-function setSwitch(el, value) { if (value) el.classList.add('on'); else el.classList.remove('on'); }
-function getSwitch(el) { return el.classList.contains('on'); }
-
-function populateProductDropdown() {
-  adminDiscountProduct.innerHTML = '<option value="">Select product</option>';
-  MENU_DATA.forEach(section => {
-    section.items.forEach(item => {
-      if (item.price) {
-        const option = document.createElement('option');
-        option.value = item.name;
-        option.textContent = `${item.name} - ${formatPrice(item.price)}₮`;
-        adminDiscountProduct.appendChild(option);
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k"){
+        e.preventDefault();
+        searchInput.focus();
       }
     });
-  });
-  if (CURRENT_FLASH_ITEM) adminDiscountProduct.value = CURRENT_FLASH_ITEM;
-}
 
-function updateFlashSummary() {
-  if (!CURRENT_FLASH_ITEM) {
-    adminFlashSummary.textContent = 'No flash deal configured yet.';
-    return;
-  }
-  adminFlashSummary.textContent =
-    `Current flash: ${CURRENT_FLASH_ITEM} at ${CURRENT_DISCOUNT_PERCENT}% for ${FLASH_DURATION_SECONDS} sec.`;
-}
+    function setLang(newLang){
+      LANG = newLang;
+      const isEN = (LANG === "en");
 
-function applyFlashPreset(presetName) {
-  const preset = FLASH_PRESETS.find(p => p.name === presetName);
-  if (!preset) return;
-  FLASH_DURATION_SECONDS = preset.duration;
-  CURRENT_DISCOUNT_PERCENT = preset.discount;
-  adminFlashDuration.value = FLASH_DURATION_SECONDS;
-  adminDiscountPercent.value = CURRENT_DISCOUNT_PERCENT;
-  updateFlashSummary();
-  saveFirebaseState({
-    flashDuration: FLASH_DURATION_SECONDS,
-    discountPercent: CURRENT_DISCOUNT_PERCENT
-  });
-}
+      langSwitch.classList.toggle("on", isEN);
+      langSwitch.setAttribute("aria-checked", String(isEN));
+      langEN.style.color = isEN ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.55)";
+      langMN.style.color = !isEN ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.55)";
 
-adminFlashPreset.addEventListener('change', () => {
-  const val = adminFlashPreset.value;
-  if (val) applyFlashPreset(val);
-});
+      taglineEl.textContent = I18N[LANG].tagline;
+      premiumBadgeTextEl.textContent = I18N[LANG].premiumBadge;
+      searchInput.placeholder = I18N[LANG].searchPH;
 
-adminCodeBtn.addEventListener('click', () => {
-  const code = adminCodeInput.value.trim();
-  if (code === ADMIN_CODE) {
-    adminLoginMsg.style.display = 'none';
-    adminLoginPanel.style.display = 'none';
-    adminPanel.style.display = 'block';
-    adminStatus.textContent = 'Unlocked · Use toggles carefully.';
-    populateProductDropdown();
-    updateFlashSummary();
-  } else {
-    adminLoginMsg.style.display = 'block';
-  }
-});
+      proofTitleEl.textContent = I18N[LANG].proofTitle;
+      proofTextEl.textContent = I18N[LANG][proofKeyByTime()];
 
-adminCodeInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') adminCodeBtn.click();
-});
+      pickerTitleEl.textContent = I18N[LANG].pickerTitle;
+      pickerPillEl.textContent = I18N[LANG].pickerPill;
+      pickerGoEl.textContent = I18N[LANG].pickerBtn;
 
-adminFlashSwitch.addEventListener('click', () => {
-  setSwitch(adminFlashSwitch, !getSwitch(adminFlashSwitch));
-  FLASH_DEALS_ACTIVE = getSwitch(adminFlashSwitch);
-  saveFirebaseState({ flashActive: FLASH_DEALS_ACTIVE });
-  startFlashLoop();
-});
+      silverTitleEl.textContent = I18N[LANG].spin.silverTitle;
+      silverPillEl.textContent = I18N[LANG].spin.silverPill;
+      silverSubEl.textContent = I18N[LANG].spin.silverSub;
+      silverNoteEl.textContent = I18N[LANG].spin.silverNote;
+      silverUnlockBtn.textContent = I18N[LANG].spin.unlock;
+      silverSpinBtn.textContent = I18N[LANG].spin.locked;
 
-adminSpinSwitch.addEventListener('click', () => {
-  setSwitch(adminSpinSwitch, !getSwitch(adminSpinSwitch));
-  SHOW_SPIN = getSwitch(adminSpinSwitch);
-  document.getElementById('silverSpinSection').style.display = SHOW_SPIN ? '' : 'none';
-  document.getElementById('goldSpinSection').style.display = SHOW_SPIN ? '' : 'none';
-  saveFirebaseState({ showSpin: SHOW_SPIN });
-});
+      goldTitleEl.textContent = I18N[LANG].spin.goldTitle;
+      goldPillEl.textContent = I18N[LANG].spin.goldPill;
+      goldSubEl.textContent = I18N[LANG].spin.goldSub;
+      goldNoteEl.textContent = I18N[LANG].spin.goldNote;
+      goldUnlockBtn.textContent = I18N[LANG].spin.unlock;
+      goldSpinBtn.textContent = I18N[LANG].spin.locked;
 
-adminFlashDuration.addEventListener('change', () => {
-  const v = parseInt(adminFlashDuration.value, 10);
-  if (!isNaN(v) && v >= 20 && v <= 7200) {
-    FLASH_DURATION_SECONDS = v;
-    saveFirebaseState({ flashDuration: FLASH_DURATION_SECONDS });
-    if (FLASH_DEALS_ACTIVE) startFlashLoop();
-    updateFlashSummary();
-  }
-});
+      buildPickerOptions();
+      renderTabs();
+      renderMenu();
 
-adminDiscountProduct.addEventListener('change', () => {
-  CURRENT_FLASH_ITEM = adminDiscountProduct.value || null;
-  saveFirebaseState({ discountProduct: CURRENT_FLASH_ITEM });
-  updateFlashSummary();
-});
-
-adminDiscountPercent.addEventListener('change', () => {
-  const v = parseInt(adminDiscountPercent.value, 10);
-  if (!isNaN(v) && v >= 5 && v <= 50) {
-    CURRENT_DISCOUNT_PERCENT = v;
-    saveFirebaseState({ discountPercent: CURRENT_DISCOUNT_PERCENT });
-    updateFlashSummary();
-  }
-});
-
-/* ========= FIRESTORE STATE MANAGEMENT ========= */
-const STATE_COLLECTION = 'menuState';
-const STATE_DOC_ID = 'currentState';
-const loadingSkeletonEl = document.getElementById('loadingSkeleton');
-
-async function loadFirebaseState() {
-  loadingSkeletonEl.style.display = 'block';
-  if (connectionStatus) connectionStatus.textContent = 'Syncing...';
-  try {
-    const docRef = db.collection(STATE_COLLECTION).doc(STATE_DOC_ID);
-    const snap = await docRef.get();
-    if (snap.exists) {
-      const st = snap.data();
-      applyFirebaseStateToVars(st);
-      updateUIFromFirebase();
-    } else {
-      const defaultState = {
-        flashActive: false,
-        showSpin: true,
-        flashDuration: 60,
-        discountProduct: null,
-        discountPercent: 10,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      await docRef.set(defaultState, { merge: true });
-      applyFirebaseStateToVars(defaultState);
-      updateUIFromFirebase();
+      buildPrizeLegend();
     }
-    loadingSkeletonEl.style.display = 'none';
-    if (connectionStatus) connectionStatus.textContent = 'Online';
-  } catch (err) {
-    console.error('Error loading Firestore state:', err);
-    loadingSkeletonEl.style.display = 'none';
-    if (connectionStatus) connectionStatus.textContent = 'Offline (menu still works)';
-    updateUIFromFirebase();
-  }
-}
 
-function applyFirebaseStateToVars(st) {
-  FLASH_DEALS_ACTIVE = !!st.flashActive;
-  SHOW_SPIN = st.showSpin !== false;
-  FLASH_DURATION_SECONDS = typeof st.flashDuration === 'number' ? st.flashDuration : FLASH_DURATION_SECONDS;
-  CURRENT_FLASH_ITEM = st.discountProduct || null;
-  CURRENT_DISCOUNT_PERCENT = typeof st.discountPercent === 'number' ? st.discountPercent : CURRENT_DISCOUNT_PERCENT;
-  flashTimeLeft = FLASH_DURATION_SECONDS;
-}
+    function toggleLang(){ setLang(LANG === "en" ? "mn" : "en"); }
 
-function updateUIFromFirebase() {
-  setSwitch(adminFlashSwitch, FLASH_DEALS_ACTIVE);
-  setSwitch(adminSpinSwitch, SHOW_SPIN);
-  adminFlashDuration.value = FLASH_DURATION_SECONDS;
-  adminDiscountPercent.value = CURRENT_DISCOUNT_PERCENT;
-
-  document.getElementById('silverSpinSection').style.display = SHOW_SPIN ? '' : 'none';
-  document.getElementById('goldSpinSection').style.display = SHOW_SPIN ? '' : 'none';
-
-  renderMenu();
-  updateFlashUI();
-  updateFlashSummary();
-
-  if (FLASH_DEALS_ACTIVE) startFlashLoop();
-}
-
-function saveFirebaseState(patch) {
-  const docRef = db.collection(STATE_COLLECTION).doc(STATE_DOC_ID);
-  const updateObj = { ...patch, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-  return docRef.set(updateObj, { merge: true });
-}
-
-function setupRealtimeListener() {
-  db.collection(STATE_COLLECTION).doc(STATE_DOC_ID)
-    .onSnapshot((snap) => {
-      if (!snap.exists) return;
-      const st = snap.data();
-      applyFirebaseStateToVars(st);
-      updateUIFromFirebase();
-      if (connectionStatus) connectionStatus.textContent = 'Online';
-    }, (err) => {
-      console.error('Realtime listener error:', err);
-      if (connectionStatus) connectionStatus.textContent = 'Connection issue';
+    langSwitch.addEventListener("click", toggleLang);
+    langSwitch.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggleLang(); }
     });
-}
 
-/* ========= SCROLL TO TOP BUTTON ========= */
-const scrollTopBtn = document.getElementById('scrollTopBtn');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 300) {
-    scrollTopBtn.style.display = 'flex';
-  } else {
-    scrollTopBtn.style.display = 'none';
-  }
-});
+    const ACCESS_HASH = "8fdf5d64bc474a69d9f452c94df8c647a0ad1e51e063c16b7dc8ab70c4e08e92";
 
-/* ========= INIT ========= */
-function init() {
-  renderSilverPrizeGrid();
-  renderGoldPrizeGrid();
-  setActiveTab('all');
-  deactivateSilverSpin();
-  deactivateGoldSpin();
-  loadFirebaseState();
-  setupRealtimeListener();
-}
-init();
-</script>
+    async function sha256Hex(str){
+      if (!window.crypto?.subtle){
+        let h = 2166136261;
+        for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return ("00000000" + (h>>>0).toString(16)).slice(-8);
+      }
+      const data = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest("SHA-256", data);
+      const bytes = new Uint8Array(digest);
+      let hex = "";
+      for (const b of bytes) hex += b.toString(16).padStart(2,"0");
+      return hex;
+    }
+
+    async function checkAccess(){
+      const input = prompt(I18N[LANG].spin.locked);
+      if (input === null) return false;
+      const hex = await sha256Hex(input.trim());
+      return hex === ACCESS_HASH;
+    }
+
+    function weightedPick(arr){
+      const total = arr.reduce((a,b)=>a+b.w,0);
+      let r = Math.random() * total;
+      for (const it of arr){ r -= it.w; if (r <= 0) return it; }
+      return arr[arr.length - 1];
+    }
+
+   const SILVER_PRIZES = [
+  { label:"Margarita (34,000₮)",         w:0.125,  tier:"big" },
+  { label:"Pornstar Martini (34,000₮)",  w:0.125,  tier:"big" },
+  { label:"Soju (30,000₮)",              w:0.3,    tier:"big" },
+  { label:"Corona (17,000₮)",            w:0.8,    tier:"medium" },
+  { label:"Altangobi (11,000₮)",         w:1.3,    tier:"medium" },
+  { label:"Tiger (11,000₮)",             w:1.3,    tier:"medium" },
+  { label:"Heineken (13,000₮)",          w:1.1,    tier:"medium" },
+  { label:"Asahi (15,000₮)",             w:0.9,    tier:"medium" },
+
+  { label:"Gum (5,000₮)",                w:10,     tier:"small" },
+  { label:"Toffee (15,000₮)",            w:1,      tier:"small" },
+  { label:"Juice (4,000₮)",              w:10,     tier:"small" },
+  { label:"Bonaqua (5,000₮)",            w:10,     tier:"small" },
+  { label:"Cola/Fanta/Sprite (6,500₮)",  w:10,     tier:"small" },
+  { label:"Orgiluun (6,500₮)",           w:10,     tier:"small" },
+  { label:"Red Bull Yellow (7,000₮)",    w:10,     tier:"small" },
+  { label:"Red Bull Blue (10,000₮)",     w:3,      tier:"small" },
+
+  { label:"Try Again (0₮)",              w:30.05,  tier:"small" },
+];
+
+
+   const GOLD_PRIZES = [
+  { label:"Margarita (34,000₮)",         w:0.2,      tier:"big" },
+  { label:"Negroni (34,000₮)",           w:0.2,      tier:"big" },
+  { label:"Pornstar Martini (34,000₮)",  w:0.2,      tier:"big" },
+  { label:"Manhattan (34,000₮)",         w:0.2,      tier:"big" },
+  { label:"Soju (30,000₮)",              w:0.4,      tier:"big" },
+
+  { label:"Corona (17,000₮)",            w:6.9554,   tier:"medium" },
+  { label:"Altangobi (11,000₮)",         w:7.4554,   tier:"medium" },
+  { label:"Tiger (11,000₮)",             w:9.4554,   tier:"medium" },
+  { label:"Ooze (12,000₮)",              w:7.4554,   tier:"medium" },
+  { label:"Heineken (13,000₮)",          w:10.4554,  tier:"medium" },
+  { label:"Kirin (13,000₮)",             w:9.4554,   tier:"medium" },
+  { label:"Asahi (15,000₮)",             w:6.9554,   tier:"medium" },
+
+  { label:"Cola/Fanta/Sprite (6,500₮)",  w:10,       tier:"small" },
+  { label:"Red Bull Blue (10,000₮)",     w:15.6125,  tier:"small" },
+
+  { label:"Try Again (0₮)",              w:14.9997,  tier:"small" },
+];
+
+
+    function uniqueTopPrizes(prizes, max, tier){
+      const out = [];
+      for (const p of prizes){
+        if (p.tier !== tier) continue;
+        if (out.includes(p.label)) continue;
+        out.push(p.label);
+        if (out.length >= max) break;
+      }
+      return out;
+    }
+
+    function buildPrizeLegend(){
+      const sBig = uniqueTopPrizes(SILVER_PRIZES, 3, "big");
+      const sMed = uniqueTopPrizes(SILVER_PRIZES, 3, "medium");
+      const sSmall = uniqueTopPrizes(SILVER_PRIZES, 3, "small");
+
+      silverLegendEl.innerHTML = `
+        ${sBig.map(x => `<span class="chip big">${x}</span>`).join("")}
+        ${sMed.map(x => `<span class="chip medium">${x}</span>`).join("")}
+        ${sSmall.map(x => `<span class="chip small">${x}</span>`).join("")}
+      `;
+
+      const gBig = uniqueTopPrizes(GOLD_PRIZES, 3, "big");
+      const gMed = uniqueTopPrizes(GOLD_PRIZES, 3, "medium");
+      const gSmall = uniqueTopPrizes(GOLD_PRIZES, 3, "small");
+
+      goldLegendEl.innerHTML = `
+        ${gBig.map(x => `<span class="chip big">${x}</span>`).join("")}
+        ${gMed.map(x => `<span class="chip medium">${x}</span>`).join("")}
+        ${gSmall.map(x => `<span class="chip small">${x}</span>`).join("")}
+      `;
+    }
+
+    function spinWheel(wheelEl, deg){
+      wheelEl.style.transform = `rotate(${deg}deg)`;
+    }
+
+    function confettiBurst(kind){
+      const conf = el("confetti");
+      conf.innerHTML = "";
+      conf.style.display = "block";
+      const n = kind === "big" ? 60 : 28;
+
+      const colors = kind === "big"
+        ? ["#ffd700","#ff2d95","#00f0ff","#b967ff","#ffffff"]
+        : ["#00f0ff","#ff2d95","#ffffff"];
+
+      const w = window.innerWidth;
+      for (let i=0;i<n;i++){
+        const p = document.createElement("i");
+        const left = Math.random() * w;
+        const dx = (Math.random() * 240 - 120) + "px";
+        p.style.left = left + "px";
+        p.style.setProperty("--dx", dx);
+        p.style.animationDuration = (1.25 + Math.random() * 0.9) + "s";
+        p.style.opacity = (0.65 + Math.random() * 0.35).toFixed(2);
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.width = (7 + Math.random() * 9) + "px";
+        p.style.height = (12 + Math.random() * 18) + "px";
+        conf.appendChild(p);
+      }
+
+      setTimeout(() => { conf.style.display = "none"; conf.innerHTML = ""; }, 1900);
+    }
+
+    let silverUnlocked = false;
+    let goldUnlocked = false;
+    let silverSpinning = false;
+    let goldSpinning = false;
+
+    silverUnlockBtn.addEventListener("click", async () => {
+      const ok = await checkAccess();
+      if (!ok){ alert(I18N[LANG].spin.invalid); return; }
+      silverUnlocked = true;
+      silverSpinBtn.disabled = false;
+      silverSpinBtn.textContent = I18N[LANG].spin.spinNow;
+      silverUnlockBtn.disabled = true;
+      silverUnlockBtn.textContent = "✓";
+    });
+
+    goldUnlockBtn.addEventListener("click", async () => {
+      const ok = await checkAccess();
+      if (!ok){ alert(I18N[LANG].spin.invalid); return; }
+      goldUnlocked = true;
+      goldSpinBtn.disabled = false;
+      goldSpinBtn.textContent = I18N[LANG].spin.spinNow;
+      goldUnlockBtn.disabled = true;
+      goldUnlockBtn.textContent = "✓";
+    });
+
+    silverSpinBtn.addEventListener("click", () => {
+      if (!silverUnlocked || silverSpinning) return;
+      silverSpinning = true;
+      silverResultEl.style.display = "none";
+
+      silverSpinBtn.disabled = true;
+      silverSpinBtn.textContent = I18N[LANG].spin.spinning;
+
+      const pick = weightedPick(SILVER_PRIZES);
+
+      const base = 360 * (8 + Math.floor(Math.random() * 5));
+      const jitter = Math.floor(Math.random() * 360);
+      const deg = base + jitter;
+      spinWheel(silverWheelEl, deg);
+
+      const hold = 4200 + Math.floor(Math.random() * 450);
+
+      setTimeout(() => {
+        silverSpinning = false;
+        silverUnlocked = false;
+        silverUnlockBtn.disabled = false;
+        silverUnlockBtn.textContent = I18N[LANG].spin.unlock;
+
+        silverSpinBtn.textContent = I18N[LANG].spin.locked;
+
+        silverResultEl.style.display = "block";
+        silverResultEl.className = "result" + (pick.tier === "big" ? " big" : "");
+        silverResultEl.innerHTML = `
+          <div class="main">${pick.label}</div>
+          <div class="sub">${I18N[LANG].spin.claim}</div>
+        `;
+
+        if (pick.tier === "big") confettiBurst("big");
+        else if (pick.tier === "medium") confettiBurst("mid");
+      }, hold);
+    });
+
+    goldSpinBtn.addEventListener("click", () => {
+      if (!goldUnlocked || goldSpinning) return;
+      goldSpinning = true;
+      goldResultEl.style.display = "none";
+
+      goldSpinBtn.disabled = true;
+      goldSpinBtn.textContent = I18N[LANG].spin.spinning;
+
+      const pick = weightedPick(GOLD_PRIZES);
+
+      const base = 360 * (9 + Math.floor(Math.random() * 6));
+      const jitter = Math.floor(Math.random() * 360);
+      const deg = base + jitter;
+      spinWheel(goldWheelEl, deg);
+
+      const hold = 4300 + Math.floor(Math.random() * 550);
+
+      setTimeout(() => {
+        goldSpinning = false;
+        goldUnlocked = false;
+        goldUnlockBtn.disabled = false;
+        goldUnlockBtn.textContent = I18N[LANG].spin.unlock;
+
+        goldSpinBtn.textContent = I18N[LANG].spin.locked;
+
+        goldResultEl.style.display = "block";
+        goldResultEl.className = "result" + (pick.tier === "big" ? " big" : "");
+        goldResultEl.innerHTML = `
+          <div class="main">${pick.label}</div>
+          <div class="sub">${I18N[LANG].spin.claim}</div>
+        `;
+
+        if (pick.tier === "big") confettiBurst("big");
+        else if (pick.tier === "medium") confettiBurst("mid");
+      }, hold);
+    });
+
+    async function init(){
+      renderTabs();
+      renderMenu();
+      setLang("en");
+
+      setInterval(() => {
+        proofTextEl.textContent = I18N[LANG][proofKeyByTime()];
+      }, 5 * 60 * 1000);
+    }
+
+    init();
+  </script>
 </body>
 </html>
